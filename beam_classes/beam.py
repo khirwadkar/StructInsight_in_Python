@@ -99,6 +99,15 @@ class Beam(Member):
             self.aml += P.calc_end_actions(self.length)
 
     def setJtDisplacements(self, joint_displacements):
+        """ Sets the displacements of this beam's end joints.
+
+        The argument joint_displacements is available after global
+        analysis of the continuous beam and is numpy array.
+        The 1st element is Y-displacement and the 2nd element is
+        Z-displacement of the left end of the beam.
+        The 3rd and 4th elements are respectively for the 
+        right end of the beam.
+        """
         self.jt_displacement = joint_displacements
         # TODO Ensure that self.jt_displacement is numpy array
 
@@ -177,6 +186,20 @@ class Beam(Member):
         def sortkey(tup):  # self.bendingMoments is a list of tuples (point_of_interest, BM)
             return abs(tup[1])
         return max(self.bendingMoments, key=sortkey)
+
+    def getSlopeDeflections(self):
+        poi = [i for i, j in self.bendingMoments]
+        bending_moments = [j for i, j in self.bendingMoments]
+        poi = np.array(poi)
+        bending_moments = np.array(bending_moments)
+        left_end_displacement = self.jt_displacement[0]
+        left_end_slope = self.jt_displacement[1]
+        slopes = np.cumsum(bending_moments)
+        slopes /= self.EI
+        slopes += left_end_slope
+        self.slopes = list(zip(poi.tolist(), slopes.tolist()))
+        # TODO same for deflection
+        return self.slopes
 
 
 

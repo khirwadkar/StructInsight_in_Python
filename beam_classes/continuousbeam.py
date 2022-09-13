@@ -55,8 +55,12 @@ class ContinuousBeam(object):
         return span_list
 
     def setAllSpans(self, span_list):
+        for i, beam in enumerate(self.beamNum):
+            beam.setLength(span_list[i])
+        """ Old logic, un-pythonic
         for i in range(len(self.beamNum)):
             self.beamNum[i].setLength(span_list[i])
+        """
         self.calcJointPosX()
 
     def getTotal_length(self):
@@ -67,16 +71,24 @@ class ContinuousBeam(object):
             aBeam.setE_in_MPa_units(ModE_MPa)
 
     def setAllE_MPa(self, E_MPa):
+        for i, beam in enumerate(self.beamNum):
+            beam.setE_in_MPa_units(E_MPa[i])
+        """ Old logic, un-pythonic
         for i in range(len(self.beamNum)):
             self.beamNum[i].setE_in_MPa_units(E_MPa[i])
+        """
 
     def setTypicalMomIner(self, typical_mi):
         for aBeam in self.beamNum:
             aBeam.setI(typical_mi)
 
     def setAllMomIner(self, mi_list):
+        for i, beam in enumerate(self.beamNum):
+            beam.setI(mi_list[i])
+        """ Old logic, un-pythonic
         for i in range(len(self.beamNum)):
             self.beamNum[i].setI(mi_list[i])
+        """
 
     def getNJoints(self):
         return self.nJoints
@@ -318,6 +330,13 @@ class ContinuousBeam(object):
         for aBeam in self.beamNum:
             bm_list.append(aBeam.getMaxBM())
         return(max(bm_list, key=sortkey))
+
+    def calcSlopeDeflections(self):   # TODO 1. Modify beam.py and write calc fn there to make this consistent with SF and BM funcs
+        for aBeam in self.beamNum:
+            aBeam.getSlopeDeflections()
+
+    def getMemberSlopeDeflections(self, memberIndex):
+        return self.beamNum[memberIndex].getSlopeDeflections()
 
     def __str__(self):
         descr = '\nContinuous Beam Analysis Results' + \

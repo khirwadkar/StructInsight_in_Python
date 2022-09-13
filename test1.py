@@ -233,6 +233,7 @@ def analysis(cb):
     cb.calcBendingMoments(0.1)
     print(cb)
     nSpans = cb.getNspans()
+    """
     for memberIndex in range(nSpans):
         print(f"Shear Forces on Beam {memberIndex + 1}:")
         print(f"-----------------------------------------")
@@ -248,6 +249,12 @@ def analysis(cb):
         print()
     print("\nMaximum of Maximum SFs: ", str(cb.getMaxSF()))
     print("\nMaximum of Maximum BMs: ", str(cb.getMaxBM()))
+    """
+    for memberIndex in range(nSpans):
+        print(f"Slopes for Beam {memberIndex + 1}:")
+        print(f"-----------------------------------------")
+        print(cb.getMemberSlopeDeflections(memberIndex))
+
 
 
 
