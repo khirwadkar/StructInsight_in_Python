@@ -188,18 +188,32 @@ class Beam(Member):
         return max(self.bendingMoments, key=sortkey)
 
     def getSlopeDeflections(self):
+        """ Calculates slopes and deflections by Moment-Area method.
+
+        """
         poi = [i for i, j in self.bendingMoments]
         bending_moments = [j for i, j in self.bendingMoments]
         poi = np.array(poi)
         bending_moments = np.array(bending_moments)
+        # bending_moments /= self.EI
         left_end_displacement = self.jt_displacement[0]
-        left_end_slope = self.jt_displacement[1]
-        slopes = np.cumsum(bending_moments)
-        slopes /= self.EI
-        slopes += left_end_slope
-        self.slopes = list(zip(poi.tolist(), slopes.tolist()))
-        # TODO same for deflection
-        return self.slopes
+        slopes = np.zeros(len(poi))
+        slopes[0] = self.jt_displacement[1]   # left_end_slope
+        deflections = np.zeros(len(poi))
+        deflections[0] = self.jt_displacement[0]  # left_end_deflection
+        for i in range(1, len(poi)):
+            slopes[i] = slopes[i-1] - (bending_moments[i] + bending_moments[i-1]) * 0.5 * (poi[i] - poi[i-1]) / self.EI
+            deflections[i] = deflections[i-1] + bending_moments[i] * (poi[i] - poi[i-1])**2 / 2 / self.EI
+        slopes[-1] = self.jt_displacement[3]   # right_end_slope to avoid residual error due to numerical integration
+        deflections[-1] = self.jt_displacement[2]  # right_end_deflection to avoid residual error due to numerical integration
+
+        # slopes = np.cumsum(bending_moments)
+        # slopes /= self.EI
+        # slopes += left_end_slope
+
+        self.slope_deflections = list(zip(poi.tolist(), slopes.tolist(), deflections.tolist()))
+        return self.slope_deflections
+
 
 
 

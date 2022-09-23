@@ -297,6 +297,24 @@ class ContinuousBeam(object):
     def getSupportReaction(self, reactionIndex):
         return self.support_reactions[reactionIndex]
 
+    def analyse(self):
+        """
+        Analyses the continuous beam after getting all the data
+        about geometry of member beams and loads acting thereupon.
+
+        """
+        self.setAmlMatrices()
+        self.setStiffnessMatrices()
+        self.calcCumulRestraints()
+        self.setGlobalStiffMatrix()
+        self.invertGlobalStiffMatrix()
+        self.setEquiJointLoads()
+        self.calcJtDisplacements()
+        self.calcSupportReactions()
+        self.rearrangeVectors()
+        self.calcFinalMemberEndActions()
+
+
     def printResults(self):
         # TODO
         pass
@@ -349,7 +367,8 @@ class ContinuousBeam(object):
         df = self.jt_displacement
         re = self.support_reactions
         for k in range(0, 2*self.nJoints, 2):
-            descr += f"{k/2+1:10} {df[k]*1000:^15.3f} {df[k+1]*1000:^15.3f} {re[k]:^15.3f} {re[k+1]:^15.3f}\n"
+            #descr += f"{k/2+1:10} {df[k]*1000:^15.3f} {df[k+1]*1000:^15.3f} {re[k]:^15.3f} {re[k+1]:^15.3f}\n"
+            descr += f"{k/2+1:10} {df[k]:^15.4e} {df[k+1]:^15.4e} {re[k]:^15.3f} {re[k+1]:^15.3f}\n"
         return descr
 
 

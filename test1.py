@@ -219,6 +219,8 @@ def getLoadData(cb):
 
 
 def analysis(cb):
+    cb.analyse()
+    """
     cb.setAmlMatrices()
     cb.setStiffnessMatrices()
     cb.calcCumulRestraints()
@@ -229,31 +231,36 @@ def analysis(cb):
     cb.calcSupportReactions()
     cb.rearrangeVectors()
     cb.calcFinalMemberEndActions()
+    """
     cb.calcShearForces(0.1)
     cb.calcBendingMoments(0.1)
     print(cb)
     nSpans = cb.getNspans()
-    """
     for memberIndex in range(nSpans):
         print(f"Shear Forces on Beam {memberIndex + 1}:")
         print(f"-----------------------------------------")
-        # print(cb.getMemberShearForces(memberIndex, 0.1))
+        print(cb.getMemberShearForces(memberIndex, 0.1))
         print("\nMaximum SF: ", str(cb.beamNum[memberIndex].getMaxSF()))
         print('-'*60)
         print()
         print(f"Bending Moments on Beam {memberIndex + 1}:")
         print(f"-----------------------------------------")
-        # print(cb.getMemberBendingMoments(memberIndex, 0.1))
+        print(cb.getMemberBendingMoments(memberIndex, 0.1))
         print("\nMaximum BM: ", str(cb.beamNum[memberIndex].getMaxBM()))
         print('='*60)
         print()
-    print("\nMaximum of Maximum SFs: ", str(cb.getMaxSF()))
-    print("\nMaximum of Maximum BMs: ", str(cb.getMaxBM()))
-    """
-    for memberIndex in range(nSpans):
+    #print("\nMaximum of Maximum SFs: ", str(cb.getMaxSF()))
+    #print("\nMaximum of Maximum BMs: ", str(cb.getMaxBM()))
+    #for memberIndex in range(nSpans):
+        sl_dfl = cb.getMemberSlopeDeflections(memberIndex)
+        slopes = [(i, j) for i, j, k in sl_dfl]
+        deflections = [(i, k) for i, j, k in sl_dfl]
         print(f"Slopes for Beam {memberIndex + 1}:")
         print(f"-----------------------------------------")
-        print(cb.getMemberSlopeDeflections(memberIndex))
+        print(slopes)
+        print(f"Deflections for Beam {memberIndex + 1}:")
+        print(f"-----------------------------------------")
+        print(deflections)
 
 
 
