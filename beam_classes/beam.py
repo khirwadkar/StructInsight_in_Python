@@ -201,9 +201,16 @@ class Beam(Member):
         slopes[0] = self.jt_displacement[1]   # left_end_slope
         deflections = np.zeros(len(poi))
         deflections[0] = self.jt_displacement[0]  # left_end_deflection
+        slope_corrections = slopes[0] * poi  # deflection by 2nd-AreaMoment-theorem is vertical
+                                            # distance between poi and tangent to curve at the
+                                            # left-most point of the area.
         for i in range(1, len(poi)):
+            slope_corrections[i] += deflections[0]
             slopes[i] = slopes[i-1] - (bending_moments[i] + bending_moments[i-1]) * 0.5 * (poi[i] - poi[i-1]) / self.EI
-            deflections[i] = deflections[i-1] + bending_moments[i] * (poi[i] - poi[i-1])**2 / 2 / self.EI
+            for j in range(i):
+                deflections[i] = deflections[i] - (bending_moments[j] + bending_moments[j+1]) * 0.5 \
+                        * (poi[j+1] - poi[j]) * ((poi[j+1] - poi[j])/2 + (poi[i] - poi[j+1])) / self.EI
+        deflections += slope_corrections
         slopes[-1] = self.jt_displacement[3]   # right_end_slope to avoid residual error due to numerical integration
         deflections[-1] = self.jt_displacement[2]  # right_end_deflection to avoid residual error due to numerical integration
 
