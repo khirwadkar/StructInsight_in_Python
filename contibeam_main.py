@@ -1,3 +1,5 @@
+# Starting point of the continuous beam analysis program.
+# This module comprises the graphics classes for user interface.
 
 from beam_classes.beam import Beam
 from beam_classes.continuousbeam import ContinuousBeam
@@ -8,11 +10,63 @@ from tkinter import simpledialog
 from tkinter import messagebox
 
 
+is_direct_call = False   # This module can be directly invoked from the command line.
+
+# The following function was created to facilitate console input while testing the 
+# correctness of analysis calculations during the initial stage of 
+# development; now it is redundant and may be deleted.
 def my_input(prompt, default_value, datatype):
     ans = input(prompt + " [" + str(default_value) + "]: ").strip()
     if not ans:
         return default_value
     return datatype(ans)
+
+# The class for displaying the main menu of continuous beam program
+class CB_MenuFrame(ttk.Frame):
+    def __init__(self, parent_frame, root_win):
+        super().__init__(parent_frame)
+        #self.grid(row=0, column=0, sticky="nsew") # This is repeatition; same step in __init__ of StructInsight class
+        self.grid(row=0, column=0, sticky="nsew") 
+
+        self.root_win = root_win
+
+        self.init_widgets()
+
+        # Configure the ttk frame to fill the main window and center the column of buttons
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(0, weight=1)
+
+    def init_widgets(self):
+        label1 = ttk.Label(self, text="Analysis of Continuous Beam", font='helvetica 24 bold', foreground='blue')
+        label1.grid(row=0, column=0, pady=20)    # , sticky="ew")
+
+        # Create a ttk style with a blue background and white foreground
+        my_style = ttk.Style()
+        my_style.configure('Blue.TButton', font='helvetica 18', foreground='white', background='blue')
+
+        # Create the ttk buttons
+        btn1 = ttk.Button(self, text="Input Beam Data", style="Blue.TButton")
+        #   , command=lambda: self.root_win.show_frame(self.root_win.frame2))
+        btn2 = ttk.Button(self, text="Input Load Data", style="Blue.TButton", width=30)
+        btn3 = ttk.Button(self, text="Analysis", style="Blue.TButton", width=30)
+        if is_direct_call:
+            btn4 = ttk.Button(self, text="", style="Blue.TButton", width=30)
+            btn4.state(['disabled'])
+        else:
+            btn4 = ttk.Button(self, text="Return to Main Menu", style="Blue.TButton",
+                    command=lambda: self.root_win.show_frame(self.root_win.frame1))
+        # dummy buttons to provide for future expansion of the program
+        btn5 = ttk.Button(self, text="", style="Blue.TButton", width=30, state='disabled')
+        btn6 = ttk.Button(self, text="", style="Blue.TButton", width=30, state='disabled')
+
+        # Place the ttk buttons in a vertical column with a gap of 20 pixels in between
+        btn1.grid(row=1, column=0, padx=150, pady=20, sticky="ew")
+        btn2.grid(row=2, column=0, padx=150, pady=20, sticky="ew")
+        btn3.grid(row=3, column=0, padx=150, pady=20, sticky="ew")
+        btn4.grid(row=4, column=0, padx=150, pady=20, sticky="ew")
+        btn5.grid(row=5, column=0, padx=150, pady=20, sticky="ew")
+        btn6.grid(row=6, column=0, padx=150, pady=20, sticky="ew")
+
 
 def main(root):
     # b1 = Beam(1)
@@ -196,37 +250,45 @@ def analysis(cb, main_window):
         print(deflections)
 
 
-"""
-root = tk.Tk()
-# root.state('iconic')
-root.overrideredirect(1)  # to avoid 'flash' due to withdraw()
-root.withdraw()
-"""
+# The class to create the root window if this module is invoked
+# directly from the command line.
+class CB_direct(tk.Tk):
 
-"""
-thestate = window.state()
-window.state('normal')
-window.state('iconic')
-window.state('withdrawn')
-window.iconify()
-window.deiconify()   # to restore from iconified or withdrawn state
-window.withdraw()
-"""
+    def __init__(self, *args, **kwargs):
+        #tk.Tk.__init__(self, *args, **kwargs)
+        super().__init__(*args, **kwargs)
+        self.geometry("800x600")
+        self.title("StructInsight")
+        # Tell the window to call this function when the close button is clicked
+        self.protocol("WM_DELETE_WINDOW", self.on_closing)
+
+
+        root_frame = ttk.Frame(self)
+        root_frame.pack(side="top", fill="both", expand = True)
+        root_frame.grid_rowconfigure(0, weight=1)
+        root_frame.grid_columnconfigure(0, weight=1)
+
+        self.frame1 = CB_MenuFrame(root_frame, self)
+
+        self.show_frame(self.frame1)
+
+    def show_frame(self, current_frame):
+        #frame = self.frames[current_frame]
+        frame = current_frame
+        frame.tkraise()
+
+    # Define the function to be called when the window is closed
+    def on_closing(self):
+        if messagebox.askquestion("Confirm", "Do you really want to exit the application?") == "yes":
+            self.destroy()
+
+
+
 
 if __name__ == '__main__':
-    root = tk.Tk()
-    root.geometry("200x200+50+50")
-    # root.overrideredirect(1)  # to avoid 'flash' due to withdraw()a
-    # root.withdraw()
-    root.iconify()
-    main(root)
-    print("Returned from main.")
-    root.grab_set()
-    root.deiconify()
-    root.mainloop()
+    is_direct_call = True
+    app = CB_direct()
+    app.mainloop()
 
-# root.deiconify()
-# root.destroy()
-# root.mainloop()
 
 

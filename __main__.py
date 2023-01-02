@@ -1,131 +1,138 @@
+#Starting point of the StructInsight software
 
 import tkinter as tk
 from tkinter import ttk
 from tkinter import simpledialog
-from tkinter import messagebox
+import tkinter.messagebox as messagebox
 import contibeam_main
 
-def continuous_beam():
-    root.iconify()
-    is_main_over = None
-    is_main_over = contibeam_main.main(root)
-    print(is_main_over)
-    root.deiconify()
 
-def plane_frame():
-    pass   
 
-def space_frame():
-    pass   
+class StructInsight(tk.Tk):
 
-def plane_truss():
-    pass   
+    def __init__(self, *args, **kwargs):
+        #tk.Tk.__init__(self, *args, **kwargs) # does same job as of the next statement.
+        super().__init__(*args, **kwargs)
+        self.geometry("800x600")
+        self.title("StructInsight")
+        # Tell the window to call this function when the close button is clicked
+        self.protocol("WM_DELETE_WINDOW", self.on_closing)
 
-def space_truss():
-    pass   
 
-def general_FEM():
-    pass   
+        root_frame = ttk.Frame(self)
+        root_frame.pack(side="top", fill="both", expand = True)
+        root_frame.grid_rowconfigure(0, weight=1)
+        root_frame.grid_columnconfigure(0, weight=1)
 
-root = tk.Tk()
-# root.state('iconic')
-# root.overrideredirect(1)  # to avoid 'flash' due to withdraw()
-# root.withdraw()
+        """
+        self.frames = {}
 
-root.title("StructInsight")
-root.geometry("700x500+50+50")
+        for F in (MainMenuFrame, contibeam_main.CB_MenuFrame):
 
-# mainframe = ttk.Frame(root, padding="7 5 7 12") # internal padding: left, top, right, bottom
-mainframe = ttk.Frame(root) 
-#mainframe.grid(column=0, row=0, sticky=(tk.N, tk.W, tk.E, tk.S))
-#mainframe.grid(column=0, row=0, padx=5, pady=5)
-mainframe.pack(padx=20, pady=10, side="top", fill="both", expand=True) 
-#mainframe['borderwidth'] = 2
-#mainframe['relief'] = 'solid'
+            frame = F(root_frame, self)
 
-root.columnconfigure(0, weight=1)
-root.rowconfigure(0, weight=1)
+            self.frames[F] = frame
 
-my_style = ttk.Style()
-my_style.configure('blue.TButton', font='helvetica 18', foreground='white', background='blue', padding=5)
+            frame.grid(row=0, column=0, sticky="nsew")
 
-# main_window.protocol("WM_DELETE_WINDOW", main_window.destroy())
-btn1 = ttk.Button(mainframe, text="Continuous Beam", command=continuous_beam, padding=5) # internal padding, i.e. around the text
-# btn1.pack(pady=10)
-btn1.grid(row = 0, column = 0, sticky=tk.W+tk.E, padx=5, pady=20)
-btn1['style'] = 'blue.TButton'
+        self.show_frame(MainMenuFrame)
+        """
+        self.frame1 = MainMenuFrame(root_frame, self)
+        self.frame2 = contibeam_main.CB_MenuFrame(root_frame, self)
 
-btn2 = ttk.Button(mainframe, text="Plane Frame", command=plane_frame, padding=5)
-btn2.state(['disabled'])
-btn2.grid(row = 1, column = 0, sticky=(tk.W, tk.E), padx=5, pady=20)
-btn2['style'] = 'blue.TButton'
+        self.show_frame(self.frame1)
 
-btn3 = ttk.Button(mainframe, text="Space Frame", command=space_frame, padding=5)
-btn3.state(['disabled'])
-btn3.grid(row = 2, column = 0, sticky=(tk.W, tk.E), pady=20)
-btn3['style'] = 'blue.TButton'
+    def show_frame(self, current_frame):
+        #frame = self.frames[current_frame]
+        frame = current_frame
+        frame.tkraise()
 
-btn4 = ttk.Button(mainframe, text="Plane Truss", command=space_frame, padding=5)
-btn4.state(['disabled'])
-btn4.grid(row = 3, column = 0, sticky=(tk.W, tk.E), pady=20)
-btn4['style'] = 'blue.TButton'
+    # Define the function to be called when the window is closed
+    def on_closing(self):
+        if messagebox.askquestion("Confirm", "Do you really want to exit the application?") == "yes":
+            self.destroy()
 
-btn5 = ttk.Button(mainframe, text="Space Truss", command=space_frame, padding=5)
-btn5.state(['disabled'])
-btn5.grid(row = 4, column = 0, sticky=(tk.W, tk.E), pady=20)
-btn5['style'] = 'blue.TButton'
 
-btn6 = ttk.Button(mainframe, text="General FEM", command=space_frame, padding=5)
-btn6.state(['disabled'])
-btn6.grid(row = 5, column = 0, sticky=(tk.W, tk.E), pady=20)
-btn6['style'] = 'blue.TButton'
+class MainMenuFrame(ttk.Frame):
 
-# btn = ttk.Button(mainframe, text="Continuous Beam").pack(pady=10)
-# btn.bind("<Button>", contibeam_main.main())
-# main_window.mainloop()
+    def __init__(self, parent_frame, root_win):
+        #ttk.Frame.__init__(self, parent_frame)
+        super().__init__(parent_frame)
+        #super().__init__(parent_frame, width=600)
+        #self.grid(row=0, column=0, sticky="nsew") # This is repeatition; same step in __init__ of StructInsight class
+        self.grid(row=0, column=0, sticky="nsew") 
+        #self.pack(side="top", padx=10, pady=10)
 
-"""
-thestate = window.state()
-window.state('normal')
-window.state('iconic')
-window.state('withdrawn')
-window.iconify()
-window.deiconify()   # to restore from iconified or withdrawn state
-window.withdraw()
-"""
+        self.root_win = root_win
 
-#if __name__ == '__main__':
-#    main()
+        self.init_widgets()
 
-# root.deiconify()
-# root.destroy()
-root.mainloop()
+        # Configure the ttk frame to fill the main window and center the column of buttons
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(0, weight=1)
 
-"""
->>> s = ttk.Style()
->>> s.theme_names()
-('clam', 'alt', 'default', 'classic')
->>> s.theme_use()
-'default'
->>> b = ttk.Button()
->>> b = ttk.Button(text="Hello")
->>> b.pack()
->>> b['Style']
-Traceback (most recent call last):
-  File "<stdin>", line 1, in <module>
-  File "/usr/lib/python3.8/tkinter/__init__.py", line 1643, in cget
-    return self.tk.call(self._w, 'cget', '-' + key)
-_tkinter.TclError: unknown option "-Style"
->>> b['style']
-''
->>> b.winfo_class()
-'TButton'
->>> s.configure('blue.TButton', font='helvetica 24', foreground='white', background='blue', padding=10)
->>> b['style'] = blue.TButton
-Traceback (most recent call last):
-  File "<stdin>", line 1, in <module>
-NameError: name 'blue' is not defined
->>> b['style'] = 'blue.TButton'
+    def init_widgets(self):
+        label1 = ttk.Label(self, text="Analysis of Structures", font='helvetica 24 bold', foreground='blue')
+        label1.grid(row=0, column=0, pady=20)    # , sticky="ew")
 
-"""
+        # Create a ttk style with a blue background and white foreground
+        my_style = ttk.Style()
+        my_style.configure('Blue.TButton', font='helvetica 18', foreground='white', background='blue')
+
+        # Create the ttk buttons
+        #button1 = ttk.Button(self, text="Button 1", style="Blue.TButton", width=30,
+        btn1 = ttk.Button(self, text="Continuous Beam", style="Blue.TButton", command=lambda: self.root_win.show_frame(self.root_win.frame2))
+        btn2 = ttk.Button(self, text="Plane Frame", style="Blue.TButton", width=30)
+        btn3 = ttk.Button(self, text="Space Frame", style="Blue.TButton", width=30)
+        btn4 = ttk.Button(self, text="Plane Truss", style="Blue.TButton", width=30)
+        btn5 = ttk.Button(self, text="Space Truss", style="Blue.TButton", width=30)
+        btn6 = ttk.Button(self, text="General FEM", style="Blue.TButton", width=30)
+
+        # Disable the unprogrammed buttons
+        btn2.state(['disabled'])
+        btn3.state(['disabled'])
+        btn4.state(['disabled'])
+        btn5.state(['disabled'])
+        btn6.state(['disabled'])
+
+        # Place the ttk buttons in a vertical column with a gap of 10 pixels in between
+        btn1.grid(row=1, column=0, padx=150, pady=20, sticky="ew")
+        btn2.grid(row=2, column=0, padx=150, pady=20, sticky="ew")
+        btn3.grid(row=3, column=0, padx=150, pady=20, sticky="ew")
+        btn4.grid(row=4, column=0, padx=150, pady=20, sticky="ew")
+        btn5.grid(row=5, column=0, padx=150, pady=20, sticky="ew")
+        btn6.grid(row=6, column=0, padx=150, pady=20, sticky="ew")
+
+
+# Place holder class during initial phase of development;
+# no longer necessary, may be deleted.
+class PageOne(ttk.Frame):
+
+    def __init__(self, parent_frame, root_win):
+        ttk.Frame.__init__(self, parent_frame)
+        #super(parent_frame)
+        #super.__init__(self, parent_frame, width=600)
+        self.grid(row=0, column=0, sticky="nsew")
+        #self.pack(side="top", padx=10, pady=10)
+
+        LARGE_FONT= ("Verdana", 12)
+        label = tk.Label(self, text="Page One!!!", font=LARGE_FONT)
+        label.pack(pady=10,padx=10)
+
+        button1 = tk.Button(self, text="Back to Home",
+                            command=lambda: root_win.show_frame(MainMenuFrame))
+        button1.pack()
+
+
+
+
+
+
+# Create an instance of the StructInsight class, i.e. the main window
+app = StructInsight()
+
+# Run the main loop
+app.mainloop()
+
+
 
