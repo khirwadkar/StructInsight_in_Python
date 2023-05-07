@@ -82,9 +82,10 @@ def main(root):
     getBeamData(cb, main_window)
     getLoadData(cb, main_window)
     analysis(cb, main_window)
-    main_window.destroy()
     # main_window.iconify() 
-    return True
+    root.wait_window(main_window)
+    main_window.destroy()
+    # return True
 
 def getBeamData(cb, main_window):
     nSpans = simpledialog.askinteger(parent=main_window, title="Input", 
