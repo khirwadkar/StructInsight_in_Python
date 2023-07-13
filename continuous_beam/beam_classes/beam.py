@@ -77,6 +77,9 @@ class Beam(Member):
         self.I = mi
         self.EI = self.E * self.I  # KN-sq.m.
 
+    def getI(self):
+        return self.I
+
     def getEI(self):
         return self.EI
 

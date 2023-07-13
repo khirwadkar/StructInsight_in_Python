@@ -93,6 +93,14 @@ class ContinuousBeam(object):
             self.beamNum[i].setI(mi_list[i])
         """
 
+    def getAllMomIner(self):
+        mi_list = [beam.getI() for beam in self.beamNum]
+        return mi_list
+
+    def getAllEI(self):
+        ei_list = [beam.getEI() for beam in self.beamNum]
+        return ei_list
+
     def getNJoints(self):
         return self.nJoints
 

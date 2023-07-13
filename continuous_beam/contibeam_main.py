@@ -104,6 +104,7 @@ class ContiBeamMenuWindow(tk.Toplevel):
 
     def open_beam_data_window(self):
         new_window = BeamData_Window(self)
+        new_window.get_data()
         self.wait_window(new_window) # Wait for the child window to close
 
     def open_load_data_window(self):

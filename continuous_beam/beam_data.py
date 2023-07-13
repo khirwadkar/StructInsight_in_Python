@@ -7,6 +7,7 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import simpledialog
 from tkinter import messagebox
+from beam_classes.beam import Beam
 
 
 
@@ -26,25 +27,128 @@ class BeamData_Window(tk.Toplevel):
 
         h = ttk.Scrollbar(self, orient=tk.HORIZONTAL)
         v = ttk.Scrollbar(self, orient=tk.VERTICAL)
-        canvas = tk.Canvas(self, scrollregion=(0, 0, 1000, 1000), yscrollcommand=v.set,
+        self.canvas = tk.Canvas(self, scrollregion=(0, 0, 1000, 1000), yscrollcommand=v.set,
                 xscrollcommand=h.set)
-        h['command'] = canvas.xview
-        v['command'] = canvas.yview
-        canvas.grid(column=0, row=0, sticky=(tk.N, tk.W, tk.E, tk.S))
+        h['command'] = self.canvas.xview
+        v['command'] = self.canvas.yview
+        self.canvas.grid(column=0, row=0, sticky=(tk.N, tk.W, tk.E, tk.S))
         h.grid(column=0, row=1, sticky=(tk.W, tk.E))
         v.grid(column=1, row=0, sticky=(tk.N, tk.S))
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(0, weight=1)
 
 
-        self.frame1 = ttk.Frame(self)
+        #self.frame1 = ttk.Frame(self)
         #self.frame1.pack(side="top", fill="both", expand = True)
         #self.frame1.grid_rowconfigure(0, weight=1)
         #self.frame1.grid_columnconfigure(0, weight=1)
         #self.init_widgets()
 
         self.cb = master.cb  # The global ContinuousBeam() object
+
+        self.qNo = 0
+        self.question = [ 
+                "Input number of spans (beam members) (1 to 10):      ",
+                "Input typical span (beam length) in meters:          ",
+                "Change the spans, if necessary. Then click 'Submit'. ",
+                "Typical Mod. of Elasticity(E) of beam material (MPa) ",
+                "Change the values, if necessary. Then click 'Submit' ",
+                "Moment of Inertia(I) of typical cross-section (m.^4) ",
+                "Change the values, if necessary. Then click 'Submit' ",
+                "Now, specify support details...                      "
+                ]
     
+
+    def test(self):
+        self.canvas.create_line(10, 5, 200, 50)
+
+    def get_data(self):
+        if self.qNo == 0:
+            question_label = tk.StringVar()
+            # qL = ttk.Label(self.canvas, textvariable=question_label)
+            # qL = ttk.Label(self.canvas, text=self.question[self.qNo])
+            qL = ttk.Label(self.canvas)
+            qL['text'] = self.question[self.qNo]
+            self.canvas.create_window(100, 10, anchor='nw', window=qL)
+            question_label.set(self.question[self.qNo])
+
+            answer_text = tk.StringVar()
+            # answer_box = ttk.Entry(self.canvas, width = 7, textvariable=answer_text)
+            answer_box = ttk.Entry(self.canvas, width = 7, text=str(self.cb.getNspans()))
+            answer_box.insert(0, str(self.cb.getNspans()))
+            answer_box.bind("<Return>", lambda e: self.on_getting_nSpans(answer_box.get()))
+            self.canvas.create_window(500, 10, anchor='nw', window=answer_box)
+            answer_text.set(self.cb.getNspans())
+
+            answer_box.focus()
+
+            self.paint_beam()
+
+        elif self.qNo == 1:
+            pass
+
+    def on_getting_nSpans(self, nSpans):
+        print(nSpans)
+
+        self.qNo += 1
+
+    def paint_beam(self):
+        drawing_scale = 700 / self.cb.getTotal_length()
+
+        depthsInPixelsList = self.getBeamDepthsInDrawingArray()
+
+        nSpans = self.cb.getNspans()
+        for i in range(nSpans):
+            self.drawBeam(i, 250, drawing_scale, depthsInPixelsList)
+        self.canvas.create_line(45, 240, 745, 240, fill='blue')
+        self.canvas.create_line(45, 250, 745, 250, fill='blue')
+
+        nJoints = self.cb.getNJoints()
+        for i in range(nJoints):
+            jtType = self.cb.getJointType(i)
+            if jtType == Beam.FIXED:
+                self.drawFixedSupport(i, 250, drawing_scale)
+            elif jtType == Beam.HINGE:
+                self.drawVertArrow(i, 250, drawing_scale)
+
+
+    def getBeamDepthsInDrawingArray(self):    # in pixel units
+        ei_list = self.cb.getAllEI()
+        ei_set = set(ei_list)
+        nSizes = len(ei_set)
+        leastThickness = int(10 / nSizes)    # maximum 10 pixels
+        if leastThickness < 1:
+            leastThickness = 1
+        ei_set_sorted = sorted(ei_set)       # this is now list actually
+        depthsInPixels = [(ei_set_sorted.index(ei) + 1) * leastThickness for ei in ei_list]
+        return depthsInPixels
+                
+    def drawBeam(self, beamIndex, y, scale, depthsInPixelsList):
+        x = 45 + int(self.cb.getJointPosX(beamIndex) * scale)
+        L = int(self.cb.getMemberLength(beamIndex) * scale)
+        t = depthsInPixelsList[beamIndex] 
+        if t == 1:
+            return
+        self.canvas.create_rectangle(x, y-t, x+L, y, fill='black')
+
+    def drawVertArrow(self, jtIndex, y, scale):
+        x = 45 + int(self.cb.getJointPosX(jtIndex) * scale)
+        self.canvas.create_line(x, y, x, y+40, arrow='first')
+
+    def drawFixedSupport(self, jtIndex, y, scale):
+        if int(self.cb.getJointPosX(jtIndex)) == 0:    # left-most end
+            x = 45
+            self.canvas.create_line(x, y-25, x, y+25)
+            for i in range(0, 45, 5):
+                self.canvas.create_line(x, y-23+i, x-5, y-18+i)
+        else:                                    # right-most end
+            x = 45 + int(self.cb.getJointPosX(jtIndex)) * scale
+            self.canvas.create_line(x, y-25, x, y+25)
+            for i in range(0, 50, 5):
+                self.canvas.create_line(x, y-23+i, x+5, y-28+i)
+
+
+
 
     def init_widgets(self):
         label1 = ttk.Label(self.frame1, text="Analysis of Continuous Beam", font='helvetica 24 bold', foreground='blue')
