@@ -14,7 +14,7 @@ class ContinuousBeam(object):
         consists of 5 beam members.
         """
         self.setNspans(5)
-        self.calcJointPosX()
+        #self.calcJointPosX()   # moved from here to the end of setNspans on 16-Jul-2023
 
 
     def setNspans(self, n):
@@ -23,6 +23,7 @@ class ContinuousBeam(object):
         for i in range(self.nSpans):
             self.beamNum.append(Beam(i+1))
         self.initJoints()
+        self.calcJointPosX()
 
     def getNspans(self):
         return self.nSpans
@@ -44,10 +45,14 @@ class ContinuousBeam(object):
         return self.jointPosX[jtIndex]
 
     def setTypicalSpan(self, typical_span):
+        self.typicalSpan = typical_span
         for aBeam in self.beamNum:
             aBeam.setLength(typical_span)
         self.calcJointPosX()
 	
+    def getTypicalSpan(self):
+        return self.typicalSpan
+
     def getMemberLength(self, beamIndex):
         return self.beamNum[beamIndex].getLength()
 
@@ -70,8 +75,12 @@ class ContinuousBeam(object):
         return self.total_length
 
     def setTypicalModEla(self, ModE_MPa):
+        self.typicalE = ModE_MPa
         for aBeam in self.beamNum:
             aBeam.setE_in_MPa_units(ModE_MPa)
+
+    def getTypicalModEla(self):
+        return self.typicalE
 
     def setAllE_MPa(self, E_MPa):
         for i, beam in enumerate(self.beamNum):
@@ -81,9 +90,17 @@ class ContinuousBeam(object):
             self.beamNum[i].setE_in_MPa_units(E_MPa[i])
         """
 
+    def getAllE_MPa(self):
+        E_list = [beam.getE_in_MPa_units() for beam in self.beamNum]
+        return E_list
+
     def setTypicalMomIner(self, typical_mi):
+        self.typicalMI = typical_mi
         for aBeam in self.beamNum:
             aBeam.setI(typical_mi)
+
+    def getTypicalMomIner(self):
+        return self.typicalMI
 
     def setAllMomIner(self, mi_list):
         for i, beam in enumerate(self.beamNum):

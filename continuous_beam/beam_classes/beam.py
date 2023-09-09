@@ -71,6 +71,9 @@ class Beam(Member):
         self.E_MPa = E_MPa
         self.E = self.E_MPa * 1000 # in KN per sq.m.
 
+    def getE_in_MPa_units(self):
+        return self.E_MPa
+
     def setI(self, mi):
         """ Moment of Inertia in m^4 units
         """

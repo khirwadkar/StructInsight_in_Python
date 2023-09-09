@@ -48,49 +48,372 @@ class BeamData_Window(tk.Toplevel):
 
         self.qNo = 0
         self.question = [ 
-                "Input number of spans (beam members) (1 to 10):      ",
-                "Input typical span (beam length) in meters:          ",
+                "Input number of spans (beam members) (1 to 10): ",
+                "Input typical span (beam length) in meters: ",
                 "Change the spans, if necessary. Then click 'Submit'. ",
                 "Typical Mod. of Elasticity(E) of beam material (MPa) ",
                 "Change the values, if necessary. Then click 'Submit' ",
                 "Moment of Inertia(I) of typical cross-section (m.^4) ",
                 "Change the values, if necessary. Then click 'Submit' ",
-                "Now, specify support details...                      "
+                "Specify support type at each joint by clicking appropriate button..."
                 ]
+        self.supportFlag = True
+        self.supportIndex = 0
     
 
     def test(self):
         self.canvas.create_line(10, 5, 200, 50)
 
     def get_data(self):
-        if self.qNo == 0:
-            question_label = tk.StringVar()
-            # qL = ttk.Label(self.canvas, textvariable=question_label)
+        if self.qNo == 0:     # Get number of spans (beams)
+            # question_label = tk.StringVar()
+            # question_label.set(self.question[self.qNo])
+            # qL = ttk.Label(self, textvariable=question_label)
             # qL = ttk.Label(self.canvas, text=self.question[self.qNo])
             qL = ttk.Label(self.canvas)
             qL['text'] = self.question[self.qNo]
             self.canvas.create_window(100, 10, anchor='nw', window=qL)
-            question_label.set(self.question[self.qNo])
 
             answer_text = tk.StringVar()
-            # answer_box = ttk.Entry(self.canvas, width = 7, textvariable=answer_text)
-            answer_box = ttk.Entry(self.canvas, width = 7, text=str(self.cb.getNspans()))
-            answer_box.insert(0, str(self.cb.getNspans()))
-            answer_box.bind("<Return>", lambda e: self.on_getting_nSpans(answer_box.get()))
+            answer_text.set(str(self.cb.getNspans()))
+            answer_box = ttk.Entry(self.canvas, width = 7, textvariable=answer_text)
+            answer_box.bind("<Return>", lambda e: self.on_getting_nSpans(answer_text.get()))
+            #answer_box = ttk.Entry(self.canvas, width = 7, text=str(self.cb.getNspans()))
+            #answer_box.delete(0, 'end')
+            #answer_box.insert(0, str(self.cb.getNspans()))
+            #answer_box.bind("<Return>", lambda e: self.on_getting_nSpans(answer_box.get()))
             self.canvas.create_window(500, 10, anchor='nw', window=answer_box)
-            answer_text.set(self.cb.getNspans())
 
             answer_box.focus()
 
             self.paint_beam()
 
-        elif self.qNo == 1:
-            pass
 
-    def on_getting_nSpans(self, nSpans):
-        print(nSpans)
+        if self.qNo == 1:          # Get typical span (beam length)
+            qL = ttk.Label(self.canvas)
+            qL['text'] = self.question[self.qNo]
+            self.canvas.create_window(110, 10, anchor='nw', window=qL)
 
+            answer_text = tk.StringVar()
+            answer_text.set("3.5")
+            answer_box = ttk.Entry(self.canvas, width = 7, textvariable=answer_text)
+            answer_box.bind("<Return>", lambda e: self.on_getting_typicalSpan(answer_text.get()))
+            self.canvas.create_window(500, 10, anchor='nw', window=answer_box)
+
+            answer_box.focus()
+
+            self.paint_beam()
+
+
+        if self.qNo == 2:        # Get actual spans (lengths) of all beams
+            qL = ttk.Label(self.canvas)
+            qL['text'] = self.question[self.qNo]
+            self.canvas.create_window(110, 10, anchor='nw', window=qL)
+
+            drawing_scale = 700 / self.cb.getTotal_length()
+            typical_span = self.cb.getTypicalSpan()
+            nSpans = self.cb.getNspans()
+            span_list = self.cb.getAllSpans()  # At this stage, their value equals typicalSpan
+            span_stringvar_list = []
+            answer_box_list = []
+            for i in range(nSpans):
+                span_stringvar_list.append(tk.StringVar())
+                span_stringvar_list[i].set(typical_span)
+                answer_box_list.append(ttk.Entry(self.canvas, width = 7, textvariable=span_stringvar_list[i]))
+                x = 45 + int(self.cb.getJointPosX(i) * drawing_scale)
+                L = int(self.cb.getMemberLength(i) * drawing_scale)
+                self.canvas.create_window(x + L/2, 290, window=answer_box_list[i])
+
+            answer_box_list[0].focus()
+
+            self.paint_beam()
+
+            submitButton = ttk.Button(self.canvas, text='Submit', command = (lambda: self.on_getting_allSpans(span_stringvar_list)))
+            self.canvas.create_window(395, 360, window=submitButton)
+
+
+        if self.qNo == 3:        # Get Typical Mod. of Elasticity(E)
+            qL = ttk.Label(self.canvas)
+            qL['text'] = self.question[self.qNo]
+            self.canvas.create_window(110, 10, anchor='nw', window=qL)
+
+            answer_text = tk.StringVar()
+            answer_text.set("34500")
+            answer_box = ttk.Entry(self.canvas, width = 7, textvariable=answer_text)
+            answer_box.bind("<Return>", lambda e: self.on_getting_typicalModE(answer_text.get()))
+            self.canvas.create_window(500, 10, anchor='nw', window=answer_box)
+
+            answer_box.focus()
+
+            self.paint_beam()
+
+
+        if self.qNo == 4:        # Get Mod. of Elasticity(E) of all the beams
+            qL = ttk.Label(self.canvas)
+            qL['text'] = self.question[self.qNo]
+            self.canvas.create_window(110, 10, anchor='nw', window=qL)
+
+            drawing_scale = 700 / self.cb.getTotal_length()
+            typical_modE = self.cb.getTypicalModEla()
+            nSpans = self.cb.getNspans()
+            #span_list = self.cb.getAllSpans()  # At this stage, their value equals typicalSpan
+            modE_stringvar_list = []
+            answer_box_list = []
+            for i in range(nSpans):
+                modE_stringvar_list.append(tk.StringVar())
+                modE_stringvar_list[i].set(typical_modE)
+                answer_box_list.append(ttk.Entry(self.canvas, width = 7, textvariable=modE_stringvar_list[i]))
+                x = 45 + int(self.cb.getJointPosX(i) * drawing_scale)
+                L = int(self.cb.getMemberLength(i) * drawing_scale)
+                self.canvas.create_window(x + L/2, 290, window=answer_box_list[i])
+
+            answer_box_list[0].focus()
+
+            self.paint_beam()
+
+            submitButton = ttk.Button(self.canvas, text='Submit', command = (lambda: self.on_getting_allModE(modE_stringvar_list)))
+            self.canvas.create_window(395, 360, window=submitButton)
+
+
+
+        if self.qNo == 5:        # Get Typical Moment of Inertia
+            qL = ttk.Label(self.canvas)
+            qL['text'] = self.question[self.qNo]
+            self.canvas.create_window(110, 10, anchor='nw', window=qL)
+
+            answer_text = tk.StringVar()
+            answer_text.set("0.0005175")
+            answer_box = ttk.Entry(self.canvas, width = 10, textvariable=answer_text)
+            answer_box.bind("<Return>", lambda e: self.on_getting_typicalMI(answer_text.get()))
+            self.canvas.create_window(495, 10, anchor='nw', window=answer_box)
+
+            answer_box.focus()
+
+            self.paint_beam()
+
+
+
+        if self.qNo == 6:        # Get Moment of Inertia of all the beams
+            qL = ttk.Label(self.canvas)
+            qL['text'] = self.question[self.qNo]
+            self.canvas.create_window(110, 10, anchor='nw', window=qL)
+
+            drawing_scale = 700 / self.cb.getTotal_length()
+            typical_mi = self.cb.getTypicalMomIner()
+            nSpans = self.cb.getNspans()
+            #span_list = self.cb.getAllSpans()  # At this stage, their value equals typicalSpan
+            MI_stringvar_list = []
+            answer_box_list = []
+            for i in range(nSpans):
+                MI_stringvar_list.append(tk.StringVar())
+                MI_stringvar_list[i].set(typical_mi)
+                answer_box_list.append(ttk.Entry(self.canvas, width = 9, textvariable=MI_stringvar_list[i]))
+                x = 45 + int(self.cb.getJointPosX(i) * drawing_scale)
+                L = int(self.cb.getMemberLength(i) * drawing_scale)
+                self.canvas.create_window(x + L/2, 290, window=answer_box_list[i])
+
+            answer_box_list[0].focus()
+
+            self.paint_beam()
+
+            submitButton = ttk.Button(self.canvas, text='Submit', command = (lambda: self.on_getting_allMI(MI_stringvar_list)))
+            self.canvas.create_window(395, 360, window=submitButton)
+
+
+
+        if self.qNo == 7:        # Get support details
+            qL = ttk.Label(self.canvas)
+            qL['text'] = self.question[self.qNo]
+            self.canvas.create_window(110, 10, anchor='nw', window=qL)
+
+            self.paint_beam()
+
+
+            self.fixedBt = ttk.Button(self.canvas, text=' Fixed Support ', command = (lambda: self.on_any_supportTypeButton_click(Beam.FIXED)))
+            self.canvas.create_window(250, 70, window=self.fixedBt)
+            self.freeBt = ttk.Button(self.canvas, text='Free Joint', command = (lambda: self.on_any_supportTypeButton_click(Beam.FREE)))
+            self.canvas.create_window(395, 70, window=self.freeBt)
+            self.simpleSupBt = ttk.Button(self.canvas, text='Simple Support', command = (lambda: self.on_any_supportTypeButton_click(Beam.HINGE)))
+            self.canvas.create_window(540, 70, window=self.simpleSupBt)
+
+            # The syntax to disable and enable a button is as follows-
+            # b.state(['disabled']) # set the disabled flag
+            # b.state(['!disabled']) # clear the disabled flag
+            # b.instate(['disabled']) # true if disabled, else false
+            # b.instate(['!disabled']) # true if not disabled, else false
+            # b.instate(['!disabled'], cmd) # execute 'cmd' if not disabled
+
+            if self.supportIndex == 0:
+                self.draw_support_pointer()
+
+            if self.supportIndex == self.cb.getNJoints() - 1:
+                self.fixedBt.state(['!disabled'])
+                self.draw_support_pointer()
+
+            if self.supportIndex > 0 and self.supportIndex < self.cb.getNJoints() - 1:
+                self.fixedBt.state(['disabled'])
+                self.draw_support_pointer()
+
+            if self.supportIndex == self.cb.getNJoints():
+                self.fixedBt.state(['disabled'])
+                self.freeBt.state(['disabled'])
+                self.simpleSupBt.state(['disabled'])
+                editButton = ttk.Button(self.canvas, text='Edit', command = (lambda: self.on_editButton_click()))
+                self.canvas.create_window(395, 400, window=editButton)
+                exitButton = ttk.Button(self.canvas, text='Exit', command = (lambda: self.destroy()))
+                self.canvas.create_window(395, 450, window=exitButton)
+
+        # print(f"qN0 = {self.qNo}")
+
+
+    def on_getting_nSpans(self, nSpans_txt):
+        try:
+            nSpans = int(nSpans_txt)
+        except ValueError:
+            messagebox.showinfo(parent=self, title="Error!",
+                    message="Number of spans must be an integer between 1 and 10.")
+            self.canvas.delete(tk.ALL)
+            self.get_data()
+            return
+        if nSpans < 1 or nSpans > 10:
+            messagebox.showinfo(parent=self, title="Error!",
+                    message="Number of spans (beam members) can have value from 1 through 10.")
+            self.canvas.delete(tk.ALL)
+            self.get_data()
+            return
+        self.cb.setNspans(nSpans)
         self.qNo += 1
+        self.canvas.delete(tk.ALL)
+        self.get_data()
+
+    def on_getting_typicalSpan(self, typicalSpan_txt):
+        try:
+            typicalSpan = float(typicalSpan_txt)
+        except ValueError:
+            messagebox.showinfo(parent=self, title="Error!",
+                    message="Typical span (beam length) must be a positive real number.")
+            self.canvas.delete(tk.ALL)
+            self.get_data()
+            return
+        if typicalSpan < 0.0:
+            messagebox.showinfo(parent=self, title="Error!",
+                    message="Beam length can not be a negative number.")
+            self.canvas.delete(tk.ALL)
+            self.get_data()
+            return
+        self.cb.setTypicalSpan(typicalSpan)
+        self.qNo += 1
+        self.canvas.delete(tk.ALL)
+        self.get_data()
+
+    def on_getting_allSpans(self, spanList_of_StringVar):
+        span_list_txt = [span.get() for span in spanList_of_StringVar]
+        beamLengths = []
+        try:
+            for i in range(len(span_list_txt)):
+                beamLengths.append(float(span_list_txt[i]))
+                if beamLengths[i] < 0.0:
+                    messagebox.showinfo(parent=self, title="Error!",
+                            message=f"Check length of Beam # {i+1}. It can not be a negative number.")
+                    #self.canvas.delete(tk.ALL)
+                    #self.get_data()
+                    return
+        except ValueError:
+            messagebox.showinfo(parent=self, title="Error!",
+                    message=f"Check length of beam # {i+1}. It must be a positive real number.")
+            #self.canvas.delete(tk.ALL)
+            #self.get_data()
+            return
+        self.cb.setAllSpans(beamLengths)
+        self.qNo += 1
+        self.canvas.delete(tk.ALL)
+        self.get_data()
+
+    def on_getting_typicalModE(self, typicalModE_txt):
+        try:
+            typicalModE = float(typicalModE_txt)
+        except ValueError:
+            messagebox.showinfo(parent=self, title="Error!",
+                    message="Typical Modulus of Elasticity must be a positive real number.")
+            #self.canvas.delete(tk.ALL)
+            #self.get_data()
+            return
+        if typicalModE < 0.0:
+            messagebox.showinfo(parent=self, title="Error!",
+                    message="Modulus of Elasticity can not be a negative number.")
+            #self.canvas.delete(tk.ALL)
+            #self.get_data()
+            return
+        self.cb.setTypicalModEla(typicalModE)
+        self.qNo += 1
+        self.canvas.delete(tk.ALL)
+        self.get_data()
+
+    def on_getting_allModE(self, modEList_of_StringVar):
+        modE_list_txt = [modE.get() for modE in modEList_of_StringVar]
+        beamE = []
+        try:
+            for i in range(len(modE_list_txt)):
+                beamE.append(float(modE_list_txt[i]))
+                if beamE[i] < 0.0:
+                    messagebox.showinfo(parent=self, title="Error!",
+                            message=f"Check Modulus of Elasticity of Beam # {i+1}. It can not be a negative number.")
+                    #self.canvas.delete(tk.ALL)
+                    #self.get_data()
+                    return
+        except ValueError:
+            messagebox.showinfo(parent=self, title="Error!",
+                    message=f"Check Modulus of Elasticity of beam # {i+1}. It must be a positive real number.")
+            #self.canvas.delete(tk.ALL)
+            #self.get_data()
+            return
+        self.cb.setAllE_MPa(beamE)
+        self.qNo += 1
+        self.canvas.delete(tk.ALL)
+        self.get_data()
+
+    def on_getting_typicalMI(self, typicalMI_txt):
+        try:
+            typicalMI = float(typicalMI_txt)
+        except ValueError:
+            messagebox.showinfo(parent=self, title="Error!",
+                    message="Typical Moment of Inertia must be a positive real number.")
+            #self.canvas.delete(tk.ALL)
+            #self.get_data()
+            return
+        if typicalMI < 0.0:
+            messagebox.showinfo(parent=self, title="Error!",
+                    message="Moment of Inertia can not be a negative number.")
+            #self.canvas.delete(tk.ALL)
+            #self.get_data()
+            return
+        self.cb.setTypicalMomIner(typicalMI)
+        self.qNo += 1
+        self.canvas.delete(tk.ALL)
+        self.get_data()
+
+    def on_getting_allMI(self, MI_List_of_StringVar):
+        mi_list_txt = [MI.get() for MI in MI_List_of_StringVar]
+        beamMI = []
+        try:
+            for i in range(len(mi_list_txt)):
+                beamMI.append(float(mi_list_txt[i]))
+                if beamMI[i] < 0.0:
+                    messagebox.showinfo(parent=self, title="Error!",
+                            message=f"Check Moment of Inertia of Beam # {i+1}. It can not be a negative number.")
+                    #self.canvas.delete(tk.ALL)
+                    #self.get_data()
+                    return
+        except ValueError:
+            messagebox.showinfo(parent=self, title="Error!",
+                    message=f"Check Moment of Inertia of beam # {i+1}. It must be a positive real number.")
+            #self.canvas.delete(tk.ALL)
+            #self.get_data()
+            return
+        self.cb.setAllMomIner(beamMI)
+        self.qNo += 1
+        self.canvas.delete(tk.ALL)
+        self.get_data()
 
     def paint_beam(self):
         drawing_scale = 700 / self.cb.getTotal_length()
@@ -110,6 +433,8 @@ class BeamData_Window(tk.Toplevel):
                 self.drawFixedSupport(i, 250, drawing_scale)
             elif jtType == Beam.HINGE:
                 self.drawVertArrow(i, 250, drawing_scale)
+            elif jtType == Beam.FREE:
+                self.drawFreeSupportSymbol(i, 250, drawing_scale)
 
 
     def getBeamDepthsInDrawingArray(self):    # in pixel units
@@ -122,7 +447,8 @@ class BeamData_Window(tk.Toplevel):
         ei_set_sorted = sorted(ei_set)       # this is now list actually
         depthsInPixels = [(ei_set_sorted.index(ei) + 1) * leastThickness for ei in ei_list]
         return depthsInPixels
-                
+
+
     def drawBeam(self, beamIndex, y, scale, depthsInPixelsList):
         x = 45 + int(self.cb.getJointPosX(beamIndex) * scale)
         L = int(self.cb.getMemberLength(beamIndex) * scale)
@@ -131,55 +457,49 @@ class BeamData_Window(tk.Toplevel):
             return
         self.canvas.create_rectangle(x, y-t, x+L, y, fill='black')
 
+
     def drawVertArrow(self, jtIndex, y, scale):
         x = 45 + int(self.cb.getJointPosX(jtIndex) * scale)
-        self.canvas.create_line(x, y, x, y+40, arrow='first')
+        self.canvas.create_line(x, y, x, y+40, arrow='first', fill='green')
+
+
+    def drawFreeSupportSymbol(self, jtIndex, y, scale):
+        x = 45 + int(self.cb.getJointPosX(jtIndex) * scale)
+        self.canvas.create_rectangle(x-2, y-3, x+2, y+3, fill='green')
+
 
     def drawFixedSupport(self, jtIndex, y, scale):
         if int(self.cb.getJointPosX(jtIndex)) == 0:    # left-most end
             x = 45
-            self.canvas.create_line(x, y-25, x, y+25)
+            self.canvas.create_line(x, y-25, x, y+25, fill='green')
             for i in range(0, 45, 5):
-                self.canvas.create_line(x, y-23+i, x-5, y-18+i)
+                self.canvas.create_line(x, y-23+i, x-5, y-18+i, fill='green')
         else:                                    # right-most end
-            x = 45 + int(self.cb.getJointPosX(jtIndex)) * scale
-            self.canvas.create_line(x, y-25, x, y+25)
+            x = 45 + int(self.cb.getJointPosX(jtIndex) * scale)
+            self.canvas.create_line(x, y-25, x, y+25, fill='green')
             for i in range(0, 50, 5):
-                self.canvas.create_line(x, y-23+i, x+5, y-28+i)
+                self.canvas.create_line(x, y-23+i, x+5, y-28+i, fill='green')
 
 
+    def draw_support_pointer(self):
+        scale = 700 / self.cb.getTotal_length()
+        jtIndex = self.supportIndex
+        x = 45 + int(self.cb.getJointPosX(jtIndex) * scale)
+        promptLabel = self.canvas.create_text(x+7, 180, text=f"For Jt. {jtIndex + 1} ?", fill='red')
+        self.canvas.create_line(x, 235, x+7, 195, arrow='first', fill='red', width=2)
 
 
-    def init_widgets(self):
-        label1 = ttk.Label(self.frame1, text="Analysis of Continuous Beam", font='helvetica 24 bold', foreground='blue')
-        label1.grid(row=0, column=0, pady=20)    # , sticky="ew")
+    def on_any_supportTypeButton_click(self, supportType):
+        self.cb.setJointType(self.supportIndex, supportType)
+        self.supportIndex += 1
+        self.canvas.delete(tk.ALL)
+        self.get_data()
 
-        # Create a ttk style with a blue background and white foreground
-        my_style = ttk.Style()
-        my_style.configure('Blue.TButton', font='helvetica 18', foreground='white', background='blue')
 
-        # Create the ttk buttons
-        btn1 = ttk.Button(self.frame1, text="Input Beam Data", style="Blue.TButton")
-        #   , command=lambda: self.root_win.show_frame(self.root_win.frame2))
-        btn2 = ttk.Button(self.frame1, text="Input Load Data", style="Blue.TButton", width=30)
-        btn3 = ttk.Button(self.frame1, text="Analysis", style="Blue.TButton", width=30)
-        if is_direct_call:
-            btn4 = ttk.Button(self.frame1, text="", style="Blue.TButton", width=30)
-            btn4.state(['disabled'])
-        else:
-            btn4 = ttk.Button(self.frame1, text="Return to Main Menu", style="Blue.TButton",
-                    command=self.on_closing)
-        # dummy buttons to provide for future expansion of the program
-        btn5 = ttk.Button(self.frame1, text="", style="Blue.TButton", width=30, state='disabled')
-        btn6 = ttk.Button(self.frame1, text="", style="Blue.TButton", width=30, state='disabled')
-
-        # Place the ttk buttons in a vertical column with a gap of 20 pixels in between
-        btn1.grid(row=1, column=0, padx=150, pady=20, sticky="ew")
-        btn2.grid(row=2, column=0, padx=150, pady=20, sticky="ew")
-        btn3.grid(row=3, column=0, padx=150, pady=20, sticky="ew")
-        btn4.grid(row=4, column=0, padx=150, pady=20, sticky="ew")
-        btn5.grid(row=5, column=0, padx=150, pady=20, sticky="ew")
-        btn6.grid(row=6, column=0, padx=150, pady=20, sticky="ew")
+    def on_editButton_click(self):
+        self.supportIndex = 0
+        self.canvas.delete(tk.ALL)
+        self.get_data()
 
 
     # Define the function to be called when the window is closed
@@ -188,59 +508,6 @@ class BeamData_Window(tk.Toplevel):
         #if messagebox.askquestion("Confirm", "Return to Menu for Continuous Beam Analysis?", parent=self) == "yes":
         #    self.destroy()
 
-
-def getBeamData(cb, main_window):
-    nSpans = simpledialog.askinteger(parent=main_window, title="Input", 
-            prompt="Number of spans:", minvalue=1, initialvalue=3) 
-    # nSpans = my_input('Number of spans', 3, int)
-    cb.setNspans(nSpans)
-
-    typicalSpan = simpledialog.askfloat(parent=main_window, title='Input', 
-            prompt='Typical span', initialvalue=3.5)
-    cb.setTypicalSpan(typicalSpan)
-    beamLengths = []
-    for i in range(nSpans):
-        span = simpledialog.askfloat(parent=main_window, title='Input', 
-                prompt='Length of beam ' + str(i+1), 
-                initialvalue=typicalSpan)
-        beamLengths.append(span)
-    cb.setAllSpans(beamLengths)
-
-    typicalE = simpledialog.askfloat(title='Input', prompt='Typical Modulus of Elasticity', 
-            parent=main_window, initialvalue=34500)
-    cb.setTypicalModEla(typicalE)
-    E = []
-    for i in range(nSpans):
-        beamE = simpledialog.askfloat(title='Input', prompt='E for beam ' + str(i+1), 
-                parent=main_window, initialvalue=typicalE)
-        E.append(beamE)
-    cb.setAllE_MPa(E)
-
-    typicalMI = simpledialog.askfloat(title='Input', prompt='Typical Moment of Inertia', 
-            parent=main_window, initialvalue=0.0005175)
-    cb.setTypicalMomIner(typicalMI)
-    mi = []
-    for i in range(nSpans):
-        beamMI = simpledialog.askfloat(title='Input', prompt='M.I. of beam ' + str(i+1), 
-                parent=main_window, initialvalue=typicalMI)
-        mi.append(beamMI)
-    cb.setAllMomIner(mi)
-
-    # for aBeam in cb.beamNum:   # TODO debug stmnt. Delete after use
-    #     print(aBeam)
-
-    # print('Enter support type at each joint, starting from the left end.')
-    # print(f'Input {Beam.FIXED} for FIXED jt., {Beam.HINGE} for HINGE, and {Beam.FREE} for FREE jt.')
-    msg_support = 'Enter support type at each joint, starting from the left end.\n'
-    msg_support += f'Input {Beam.FIXED} for FIXED jt., {Beam.HINGE} for HINGE, and {Beam.FREE} for FREE jt.'
-    messagebox.showinfo(parent=main_window, message = msg_support)
-
-    nJoints = cb.getNJoints()
-    for jtIndex in range(nJoints):
-        supportType = simpledialog.askinteger(title='Input', 
-                prompt=f'Support type for joint {jtIndex + 1}', 
-                parent=main_window, minvalue=Beam.FIXED, maxvalue=Beam.FREE, initialvalue=Beam.HINGE)
-        cb.setJointType(jtIndex, supportType)
 
 
 
