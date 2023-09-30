@@ -71,30 +71,31 @@ class ContiBeamMenuWindow(tk.Toplevel):
         my_style.configure('Blue.TButton', font='helvetica 18', foreground='white', background='blue')
 
         # Create the ttk buttons
-        btn1 = ttk.Button(self.frame1, text="Input Beam Data", style="Blue.TButton", 
+        self.btn1 = ttk.Button(self.frame1, text="Input Beam Data", style="Blue.TButton", 
                 command=self.open_beam_data_window)
         #   , command=lambda: self.root_win.show_frame(self.root_win.frame2))
-        btn2 = ttk.Button(self.frame1, text="Input Load Data", style="Blue.TButton", width=30,
+        self.btn2 = ttk.Button(self.frame1, text="Input Load Data", style="Blue.TButton", width=30,
                 command=self.open_load_data_window)
-        btn3 = ttk.Button(self.frame1, text="Analysis", style="Blue.TButton", width=30,
+        self.btn3 = ttk.Button(self.frame1, text="Analysis", style="Blue.TButton", width=30,
                 command=self.open_analysis_window)
         if is_direct_call:
-            btn4 = ttk.Button(self.frame1, text="", style="Blue.TButton", width=30)
-            btn4.state(['disabled'])
+            self.btn4 = ttk.Button(self.frame1, text="Exit", style="Blue.TButton", width=30,
+                    command=self.on_closing)
+            #self.btn4.state(['disabled'])
         else:
-            btn4 = ttk.Button(self.frame1, text="Return to Main Menu", style="Blue.TButton",
+            self.btn4 = ttk.Button(self.frame1, text="Return to Main Menu", style="Blue.TButton",
                     command=self.on_closing)
         # dummy buttons to provide for future expansion of the program
-        btn5 = ttk.Button(self.frame1, text="", style="Blue.TButton", width=30, state='disabled')
-        btn6 = ttk.Button(self.frame1, text="", style="Blue.TButton", width=30, state='disabled')
+        self.btn5 = ttk.Button(self.frame1, text="", style="Blue.TButton", width=30, state='disabled')
+        self.btn6 = ttk.Button(self.frame1, text="", style="Blue.TButton", width=30, state='disabled')
 
         # Place the ttk buttons in a vertical column with a gap of 20 pixels in between
-        btn1.grid(row=1, column=0, padx=150, pady=20, sticky="ew")
-        btn2.grid(row=2, column=0, padx=150, pady=20, sticky="ew")
-        btn3.grid(row=3, column=0, padx=150, pady=20, sticky="ew")
-        btn4.grid(row=4, column=0, padx=150, pady=20, sticky="ew")
-        btn5.grid(row=5, column=0, padx=150, pady=20, sticky="ew")
-        btn6.grid(row=6, column=0, padx=150, pady=20, sticky="ew")
+        self.btn1.grid(row=1, column=0, padx=150, pady=20, sticky="ew")
+        self.btn2.grid(row=2, column=0, padx=150, pady=20, sticky="ew")
+        self.btn3.grid(row=3, column=0, padx=150, pady=20, sticky="ew")
+        self.btn4.grid(row=4, column=0, padx=150, pady=20, sticky="ew")
+        self.btn5.grid(row=5, column=0, padx=150, pady=20, sticky="ew")
+        self.btn6.grid(row=6, column=0, padx=150, pady=20, sticky="ew")
 
 
     # Define the function to be called when the window is closed
@@ -104,16 +105,56 @@ class ContiBeamMenuWindow(tk.Toplevel):
 
     def open_beam_data_window(self):
         new_window = BeamData_Window(self)
+
+        self.btn1.state(['disabled'])
+        self.btn2.state(['disabled'])
+        self.btn3.state(['disabled'])
+        if not is_direct_call:
+            self.btn4.state(['disabled'])
+
         new_window.get_data()
         self.wait_window(new_window) # Wait for the child window to close
+        
+        self.btn1.state(['!disabled'])
+        self.btn2.state(['!disabled'])
+        self.btn3.state(['!disabled'])
+        if not is_direct_call:
+            self.btn4.state(['!disabled'])
 
     def open_load_data_window(self):
         new_window = LoadData_Window(self)
+
+        self.btn1.state(['disabled'])
+        self.btn2.state(['disabled'])
+        self.btn3.state(['disabled'])
+        if not is_direct_call:
+            self.btn4.state(['disabled'])
+
+        new_window.get_data()
         self.wait_window(new_window) # Wait for the child window to close
+
+        self.btn1.state(['!disabled'])
+        self.btn2.state(['!disabled'])
+        self.btn3.state(['!disabled'])
+        if not is_direct_call:
+            self.btn4.state(['!disabled'])
 
     def open_analysis_window(self):
         new_window = Analysis_Window(self)
+
+        self.btn1.state(['disabled'])
+        self.btn2.state(['disabled'])
+        self.btn3.state(['disabled'])
+        if not is_direct_call:
+            self.btn4.state(['disabled'])
+
         self.wait_window(new_window) # Wait for the child window to close
+
+        self.btn1.state(['!disabled'])
+        self.btn2.state(['!disabled'])
+        self.btn3.state(['!disabled'])
+        if not is_direct_call:
+            self.btn4.state(['!disabled'])
 
 
 
@@ -137,57 +178,7 @@ def main(root):
     # return True
 
 def getBeamData(cb, main_window):
-    nSpans = simpledialog.askinteger(parent=main_window, title="Input", 
-            prompt="Number of spans:", minvalue=1, initialvalue=3) 
-    # nSpans = my_input('Number of spans', 3, int)
-    cb.setNspans(nSpans)
-
-    typicalSpan = simpledialog.askfloat(parent=main_window, title='Input', 
-            prompt='Typical span', initialvalue=3.5)
-    cb.setTypicalSpan(typicalSpan)
-    beamLengths = []
-    for i in range(nSpans):
-        span = simpledialog.askfloat(parent=main_window, title='Input', 
-                prompt='Length of beam ' + str(i+1), 
-                initialvalue=typicalSpan)
-        beamLengths.append(span)
-    cb.setAllSpans(beamLengths)
-
-    typicalE = simpledialog.askfloat(title='Input', prompt='Typical Modulus of Elasticity', 
-            parent=main_window, initialvalue=34500)
-    cb.setTypicalModEla(typicalE)
-    E = []
-    for i in range(nSpans):
-        beamE = simpledialog.askfloat(title='Input', prompt='E for beam ' + str(i+1), 
-                parent=main_window, initialvalue=typicalE)
-        E.append(beamE)
-    cb.setAllE_MPa(E)
-
-    typicalMI = simpledialog.askfloat(title='Input', prompt='Typical Moment of Inertia', 
-            parent=main_window, initialvalue=0.0005175)
-    cb.setTypicalMomIner(typicalMI)
-    mi = []
-    for i in range(nSpans):
-        beamMI = simpledialog.askfloat(title='Input', prompt='M.I. of beam ' + str(i+1), 
-                parent=main_window, initialvalue=typicalMI)
-        mi.append(beamMI)
-    cb.setAllMomIner(mi)
-
-    # for aBeam in cb.beamNum:   # TODO debug stmnt. Delete after use
-    #     print(aBeam)
-
-    # print('Enter support type at each joint, starting from the left end.')
-    # print(f'Input {Beam.FIXED} for FIXED jt., {Beam.HINGE} for HINGE, and {Beam.FREE} for FREE jt.')
-    msg_support = 'Enter support type at each joint, starting from the left end.\n'
-    msg_support += f'Input {Beam.FIXED} for FIXED jt., {Beam.HINGE} for HINGE, and {Beam.FREE} for FREE jt.'
-    messagebox.showinfo(parent=main_window, message = msg_support)
-
-    nJoints = cb.getNJoints()
-    for jtIndex in range(nJoints):
-        supportType = simpledialog.askinteger(title='Input', 
-                prompt=f'Support type for joint {jtIndex + 1}', 
-                parent=main_window, minvalue=Beam.FIXED, maxvalue=Beam.FREE, initialvalue=Beam.HINGE)
-        cb.setJointType(jtIndex, supportType)
+    pass
 
 def getLoadData(cb, main_window):
     nJoints = cb.getNJoints()
@@ -317,6 +308,7 @@ class CB_direct(tk.Tk):
 
         new_window = ContiBeamMenuWindow(self)
         self.wait_window(new_window) # Wait for the child window to close
+        self.destroy()
 
 
 
