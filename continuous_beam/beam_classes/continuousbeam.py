@@ -32,7 +32,9 @@ class ContinuousBeam(object):
         self.nJoints = self.nSpans + 1      # No. of joints
         self.nrj = self.nJoints             # No. of restrained joints
         self.nRestraints = 0                # Total number of support restraints
-	                                    # against translation and rotation
+	                                    # against translation and rotation.
+                                            # We are assuming hinge joints, so all
+                                            # of them are restrained in translation.
         self.rL = [1, 0] * self.nJoints     # Joint Restraint List
 
     def calcJointPosX(self):
@@ -348,10 +350,10 @@ class ContinuousBeam(object):
         pass
 
     def calcShearForces(self, step_size=0.05):  # TODO 1. this fn. may be redundant.  2. Check whether repeated calling makes any difference
-        for aBeam in self.beamNum:
+        for aBeam in self.beamNum:              # 12-Oct-2023: Calling this function from 'analysis.py'. It is not redundant.
             aBeam.calcShearForces(step_size)
 
-    def getMemberShearForces(self, memberIndex, step_size=0.05):
+    def getMemberShearForces(self, memberIndex, step_size=0.05):    # TODO 13-Oct-2023 Check whether this function is redundant.
         return self.beamNum[memberIndex].getShearForces(step_size)
 
     def getMaxSF(self):
@@ -363,10 +365,10 @@ class ContinuousBeam(object):
         return(max(sf_list, key=sortkey))
 
     def calcBendingMoments(self, step_size=0.05):   # TODO 1. this fn. may be redundant.  2. Check whether repeated calling makes any difference
-        for aBeam in self.beamNum:
+        for aBeam in self.beamNum:                  # 12-Oct-2023: Calling this function from 'analysis.py'. It is not redundant.
             aBeam.calcBendingMoments(step_size)
 
-    def getMemberBendingMoments(self, memberIndex, step_size=0.05):
+    def getMemberBendingMoments(self, memberIndex, step_size=0.05):  # TODO 13-Oct-2023 Check whether this function is redundant
         return self.beamNum[memberIndex].getBendingMoments(step_size)
 
     def getMaxBM(self):
@@ -378,8 +380,16 @@ class ContinuousBeam(object):
         return(max(bm_list, key=sortkey))
 
     def calcSlopeDeflections(self):   # TODO 1. Modify beam.py and write calc fn there to make this consistent with SF and BM funcs
-        for aBeam in self.beamNum:
+        for aBeam in self.beamNum:    # 12-Oct-2023: Calling this function from 'analysis.py'. It is not redundant.
             aBeam.getSlopeDeflections()
+
+    def getMaxDeflection(self):
+        def sortkey(tup):  # deformations_list consists of tuples (point_of_interest, slope, deflection)
+            return abs(tup[2])
+        deformations_list = []
+        for aBeam in self.beamNum:
+            deformations_list.append(aBeam.getMaxDeflection())
+        return(max(deformations_list, key=sortkey))
 
     def getMemberSlopeDeflections(self, memberIndex):
         return self.beamNum[memberIndex].getSlopeDeflections()

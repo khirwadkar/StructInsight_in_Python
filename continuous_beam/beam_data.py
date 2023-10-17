@@ -432,7 +432,7 @@ class BeamData_Window(tk.Toplevel):
             if jtType == Beam.FIXED:
                 self.drawFixedSupport(i, 250, drawing_scale)
             elif jtType == Beam.HINGE:
-                self.drawVertArrow(i, 250, drawing_scale)
+                self.drawSimpleSupport(i, 250, drawing_scale)
             elif jtType == Beam.FREE:
                 self.drawFreeSupportSymbol(i, 250, drawing_scale)
 
@@ -458,7 +458,7 @@ class BeamData_Window(tk.Toplevel):
         self.canvas.create_rectangle(x, y-t, x+L, y, fill='black')
 
 
-    def drawVertArrow(self, jtIndex, y, scale):
+    def drawSimpleSupport(self, jtIndex, y, scale):
         x = 45 + int(self.cb.getJointPosX(jtIndex) * scale)
         self.canvas.create_line(x, y, x, y+40, arrow='first', fill='green')
 

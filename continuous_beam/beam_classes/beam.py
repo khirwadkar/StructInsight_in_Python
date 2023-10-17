@@ -164,6 +164,7 @@ class Beam(Member):
     def getMaxSF(self):
         def sortkey(tup):  # self.shearForces is a list of tuples (point_of_interest, SF)
             return abs(tup[1])
+        # self.calcShearForces()      13-Oct-2023
         return max(self.shearForces, key=sortkey)
 
     def calcBendingMoments(self, step_size=0.05):
@@ -195,6 +196,7 @@ class Beam(Member):
     def getMaxBM(self):
         def sortkey(tup):  # self.bendingMoments is a list of tuples (point_of_interest, BM)
             return abs(tup[1])
+        # self.calcBendingMoments()     13-Oct-2023
         return max(self.bendingMoments, key=sortkey)
 
     def getSlopeDeflections(self):
@@ -231,6 +233,12 @@ class Beam(Member):
         self.slope_deflections = list(zip(poi.tolist(), slopes.tolist(), deflections.tolist()))
         return self.slope_deflections
 
+
+    def getMaxDeflection(self):
+        def sortkey(tup):  # self.slope_deflections is a list of tuples (point_of_interest, slope, deflection)
+            return abs(tup[2])
+        slope_deflection_list = self.getSlopeDeflections()
+        return max(slope_deflection_list, key=sortkey)
 
 
 

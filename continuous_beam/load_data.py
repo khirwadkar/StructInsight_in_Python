@@ -177,7 +177,7 @@ class LoadData_Window(tk.Toplevel):
             self.canvas.create_window(475, 110, window=self.ptLoadDownBt)
 
 
-            ptLoadSubmitBt = ttk.Button(self.canvas, text='No more Point Loads', command = (lambda: self.on_ptLoadSubmitB_click()))
+            ptLoadSubmitBt = ttk.Button(self.canvas, text='No more Point Loads', command = (lambda: self.on_ptLoadSubmitBt_click()))
             self.canvas.create_window(395, 450, window=ptLoadSubmitBt)
 
             self.paint_beam()
@@ -216,6 +216,8 @@ class LoadData_Window(tk.Toplevel):
         vLoad = simpledialog.askfloat(title='Input Joint Load', 
                 prompt=f'Input upward point load in kN units at joint # {self.supportIndex + 1}', 
                 parent=self, initialvalue=0.0, minvalue=0.0)
+        if vLoad == None:
+            return
         self.cb.setJtAction(2*self.supportIndex, vLoad)
         self.draw_joint_pointLoads()
 
@@ -224,6 +226,8 @@ class LoadData_Window(tk.Toplevel):
         vLoad = simpledialog.askfloat(title='Input Joint Load', 
                 prompt=f'Input downward point load in kN units at joint # {self.supportIndex + 1}', 
                 parent=self, initialvalue=0.0, minvalue=0.0)
+        if vLoad == None:
+            return
         self.cb.setJtAction(2*self.supportIndex, -vLoad)
         self.draw_joint_pointLoads()
    
@@ -232,6 +236,8 @@ class LoadData_Window(tk.Toplevel):
         jtMoment = simpledialog.askfloat(title='Input Joint Moment', 
                 prompt=f'Input clockwise moment in kN-m units at joint # {self.supportIndex + 1}', 
                 parent=self, initialvalue=0.0, minvalue=0.0)
+        if jtMoment == None:
+            return
         self.cb.setJtAction(2*self.supportIndex + 1, -jtMoment)
         self.draw_joint_moments()
    
@@ -240,6 +246,8 @@ class LoadData_Window(tk.Toplevel):
         jtMoment = simpledialog.askfloat(title='Input Joint Moment', 
                 prompt=f'Input counter-clockwise moment in kN-m units at joint # {self.supportIndex + 1}', 
                 parent=self, initialvalue=0.0, minvalue=0.0)
+        if jtMoment == None:
+            return
         self.cb.setJtAction(2*self.supportIndex + 1, jtMoment)
         self.draw_joint_moments()
 
@@ -282,6 +290,8 @@ class LoadData_Window(tk.Toplevel):
         udl_value = simpledialog.askfloat(title='Uniformly Distributed Load (UDL)',
                 prompt=f'Input upward UDL in kN/m units on member # {self.memberIndex + 1}', 
                 parent=self, initialvalue=0.0, minvalue=0.0)
+        if udl_value == None:
+            return
         # TODO : The following statements would be modified after the general
         #        UDL class is developed.
         self.cb.setMemberUDLfull(self.memberIndex, -udl_value)
@@ -292,6 +302,8 @@ class LoadData_Window(tk.Toplevel):
         udl_value = simpledialog.askfloat(title='Uniformly Distributed Load (UDL)',
                 prompt=f'Input downward UDL in kN/m units on member # {self.memberIndex + 1}', 
                 parent=self, initialvalue=0.0, minvalue=0.0)
+        if udl_value == None:
+            return
         # TODO : The following statements would be modified after the general
         #        UDL class is developed.
         self.cb.setMemberUDLfull(self.memberIndex, udl_value)
@@ -309,12 +321,16 @@ class LoadData_Window(tk.Toplevel):
         P = simpledialog.askfloat(title='Input Upward Point Load',
                 prompt=f'Upward point load in kN units on member # {self.memberIndex + 1}', 
                 parent=self, initialvalue=0.0, minvalue=0.0)
+        if P == None:
+            return
         x = 0.0
         memberLength = self.cb.getMemberLength(self.memberIndex)
         if P > 0.0:
             x = simpledialog.askfloat(title='Input Point Load Position', 
                     prompt=f'Distance in meters of {P} kN load from left end of member # {self.memberIndex + 1}', 
                     parent=self, minvalue=0.0, maxvalue=memberLength)
+            if x == None:
+                return
         else:
             messagebox.showwarning(title='Zero Point Load', parent=self, 
                     message='You have given Zero as the value of point load. Not adding it to the point loads list.')
@@ -334,12 +350,16 @@ class LoadData_Window(tk.Toplevel):
         P = simpledialog.askfloat(title='Input Downward Point Load',
                 prompt=f'Downward point load in kN units on member # {self.memberIndex + 1}', 
                 parent=self, initialvalue=0.0, minvalue=0.0)
+        if P == None:
+            return
         x = 0.0
         memberLength = self.cb.getMemberLength(self.memberIndex)
         if P > 0.0:
             x = simpledialog.askfloat(title='Input Point Load Position', 
                     prompt=f'Distance in meters of {P} kN load from left end of member # {self.memberIndex + 1}', 
                     parent=self, minvalue=0.0, maxvalue=memberLength)
+            if x == None:
+                return
         else:
             messagebox.showwarning(title='Zero Point Load', parent=self, 
                     message='You have given Zero as the value of point load. Not adding it to the point loads list.')
@@ -355,7 +375,7 @@ class LoadData_Window(tk.Toplevel):
         self.draw_member_PtLoads()
 
 
-    def on_ptLoadSubmitB_click(self):
+    def on_ptLoadSubmitBt_click(self):
         self.qNo += 1
         self.memberIndex = 0
         self.canvas.delete(tk.ALL)
@@ -381,7 +401,7 @@ class LoadData_Window(tk.Toplevel):
             if jtType == Beam.FIXED:
                 self.drawFixedSupport(i, 250, drawing_scale)
             elif jtType == Beam.HINGE:
-                self.drawVertArrow(i, 250, drawing_scale)
+                self.drawSimpleSupport(i, 250, drawing_scale)
             elif jtType == Beam.FREE:
                 self.drawFreeSupportSymbol(i, 250, drawing_scale)
 
@@ -407,7 +427,7 @@ class LoadData_Window(tk.Toplevel):
         self.canvas.create_rectangle(x, y-t, x+L, y, fill='black')
 
 
-    def drawVertArrow(self, jtIndex, y, scale):
+    def drawSimpleSupport(self, jtIndex, y, scale):
         x = 45 + int(self.cb.getJointPosX(jtIndex) * scale)
         self.canvas.create_line(x, y, x, y+40, arrow='first', fill='green')
 
@@ -520,21 +540,21 @@ class LoadData_Window(tk.Toplevel):
             y = 250
             if udl.p > 0.0:
                 for i in range(n):
-                    self.canvas.create_arc(x+i*6, y-14, x+i*6+6, y-5, style='arc', outline='magenta',
+                    self.canvas.create_arc(x+i*6, y-14, x+i*6+6, y-5, style='arc', outline='orange',
                             start=180, extent=-180, tags=('udLoads')) # 6 x 9 ellipse's arc
                 xc = x + L / 2
                 yc = y - 20
-                self.canvas.create_line(xc, yc, xc, yc-45, arrow='first', fill='magenta', tags=('udLoads'))
-                self.canvas.create_text(xc, yc-60, text=f"{abs(udl.p)} kN/m", fill='magenta', tags=('udLoads'))
+                self.canvas.create_line(xc, yc, xc, yc-45, arrow='first', fill='orange', tags=('udLoads'))
+                self.canvas.create_text(xc, yc-60, text=f"{abs(udl.p)} kN/m", fill='orange', tags=('udLoads'))
             if udl.p < 0.0:
                 for i in range(n):
-                    self.canvas.create_arc(x+i*6, y, x+i*6+6, y+9, style='arc', outline='magenta',
+                    self.canvas.create_arc(x+i*6, y, x+i*6+6, y+9, style='arc', outline='orange',
                             start=180, extent=180, tags=('udLoads')) # 6 x 9 ellipse's arc
                 xc = x + L / 2
                 yc = y + 10
-                self.canvas.create_line(xc, yc, xc+20, yc+20, arrow='first', fill='magenta', tags=('udLoads'))
-                self.canvas.create_line(xc+20, yc+20, xc, yc-75, fill='magenta', tags=('udLoads'))
-                self.canvas.create_text(xc, yc-90, text=f"{abs(udl.p)} kN/m", fill='magenta', tags=('udLoads'))
+                self.canvas.create_line(xc, yc, xc+20, yc+20, arrow='first', fill='orange', tags=('udLoads'))
+                self.canvas.create_line(xc+20, yc+20, xc, yc-75, fill='orange', tags=('udLoads'))
+                self.canvas.create_text(xc, yc-90, text=f"{abs(udl.p)} kN/m", fill='orange', tags=('udLoads'))
 
 
     def draw_member_PtLoads(self):
