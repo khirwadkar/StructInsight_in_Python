@@ -86,7 +86,8 @@ class Analysis_Window(tk.Toplevel):
         self.hideGridButton.pack(side=tk.LEFT, padx=5)
 
 
-        # self.test_print()
+        self.save_results()
+        # self.print_results()
         self.show_results()
 
 
@@ -131,8 +132,8 @@ class Analysis_Window(tk.Toplevel):
                 xPos = xStart + int(x * drg_scale)
                 pPixels = int(delta * dfln_scale)
                 yPos = y - pPixels  # positive deflection is upwards.
-                self.canvas.create_line(xPos, y, xPos, yPos, fill='yellow', tags=('sfdbmd'))
-                self.canvas.create_line(xPrev, yPrev, xPos, yPos, fill='yellow', tags=('sfdbmd'))
+                self.canvas.create_line(xPos, y, xPos, yPos, fill='violet', tags=('sfdbmd'))
+                self.canvas.create_line(xPrev, yPrev, xPos, yPos, fill='violet', tags=('sfdbmd'))
                 xPrev = xPos
                 yPrev = yPos
 
@@ -496,25 +497,93 @@ class Analysis_Window(tk.Toplevel):
                             tags=('momentReaction'))
 
 
-    def test_print(self):
+    def save_results(self):
+        with open('structinsight_results.txt', 'w') as file1:
+            file1.write(str(self.cb))
+            file1.write('\n')
+            nSpans = self.cb.getNspans()
+            for memberIndex in range(nSpans):
+                file1.write(f"Shear Forces on Beam {memberIndex + 1}:\n")
+                file1.write(f"-----------------------------------------\n")
+                # file1.write(self.cb.getMemberShearForces(memberIndex, 0.1))
+                sf_list = self.cb.getMemberShearForces(memberIndex, 0.1)
+                sf_list_rounded = [(round(i, 2), round(j, 3)) for i, j in sf_list]
+                file1.write(str(sf_list_rounded))
+                file1.write('\n')
+                file1.write("\nMaximum SF: " + str(self.cb.memberBeamsList[memberIndex].getMaxSF()) + '\n')
+                file1.write('-'*60)
+                file1.write('\n')
+                file1.write('\n')
+                file1.write(f"Bending Moments on Beam {memberIndex + 1}:\n")
+                file1.write(f"-----------------------------------------\n")
+                # file1.write(self.cb.getMemberBendingMoments(memberIndex, 0.1))
+                bm_list = self.cb.getMemberBendingMoments(memberIndex, 0.1)
+                bm_list_rounded = [(round(i, 2), round(j, 3)) for i, j in bm_list]
+                file1.write(str(bm_list_rounded))
+                file1.write("\nMaximum BM: " + str(self.cb.memberBeamsList[memberIndex].getMaxBM()) + '\n')
+                file1.write('-'*60)
+                file1.write('\n')
+                file1.write('\n')
+                sl_dfl = self.cb.getMemberSlopeDeflections(memberIndex)
+                slopes = [(round(i, 2), round(j, 5)) for i, j, k in sl_dfl]
+                deflections = [(round(i, 2), round(k, 5)) for i, j, k in sl_dfl]
+                file1.write(f"Slopes for Beam {memberIndex + 1}:\n")
+                file1.write(f"-----------------------------------------\n")
+                file1.write(str(slopes))
+                file1.write('\n')
+                file1.write('-'*60)
+                file1.write('\n')
+                file1.write('\n')
+                file1.write(f"Deflections for Beam {memberIndex + 1}:\n")
+                file1.write(f"-----------------------------------------\n")
+                file1.write(str(deflections))
+                file1.write('\n')
+                file1.write('='*60)
+                file1.write('\n')
+                file1.write('\n')
+                file1.write('\n')
+
+
+    def print_results(self):
         self.cb.calcShearForces(0.1)
         self.cb.calcBendingMoments(0.1)
         print(self.cb)
+        print()
         nSpans = self.cb.getNspans()
         for memberIndex in range(nSpans):
             print(f"Shear Forces on Beam {memberIndex + 1}:")
             print(f"-----------------------------------------")
-            print(self.cb.getMemberShearForces(memberIndex, 0.1))
-            print("\nMaximum SF: ", str(self.cb.beamNum[memberIndex].getMaxSF()))
+            # print(self.cb.getMemberShearForces(memberIndex, 0.1))
+            sf_list = self.cb.getMemberShearForces(memberIndex, 0.1)
+            sf_list_rounded = [(round(i, 2), round(j, 3)) for i, j in sf_list]
+            print(sf_list_rounded)
+            print("\nMaximum SF: ", str(self.cb.memberBeamsList[memberIndex].getMaxSF()))
             print('-'*60)
             print()
             print(f"Bending Moments on Beam {memberIndex + 1}:")
             print(f"-----------------------------------------")
-            print(self.cb.getMemberBendingMoments(memberIndex, 0.1))
-            print("\nMaximum BM: ", str(self.cb.beamNum[memberIndex].getMaxBM()))
+            # print(self.cb.getMemberBendingMoments(memberIndex, 0.1))
+            bm_list = self.cb.getMemberBendingMoments(memberIndex, 0.1)
+            bm_list_rounded = [(round(i, 2), round(j, 3)) for i, j in bm_list]
+            print(bm_list_rounded)
+            print("\nMaximum BM: ", str(self.cb.memberBeamsList[memberIndex].getMaxBM()))
+            print('-'*60)
+            print()
+            sl_dfl = self.cb.getMemberSlopeDeflections(memberIndex)
+            slopes = [(round(i, 2), round(j, 5)) for i, j, k in sl_dfl]
+            deflections = [(round(i, 2), round(k, 5)) for i, j, k in sl_dfl]
+            print(f"Slopes for Beam {memberIndex + 1}:")
+            print(f"-----------------------------------------")
+            print(slopes)
+            print('-'*60)
+            print()
+            print(f"Deflections for Beam {memberIndex + 1}:")
+            print(f"-----------------------------------------")
+            print(deflections)
             print('='*60)
             print()
-        pass
+            print()
+
 
     # Define the function to be called when the window is closed
     def on_closing(self):
@@ -523,47 +592,6 @@ class Analysis_Window(tk.Toplevel):
         #    self.destroy()
 
 
-### All the following lines can be deleted.
-
-"""
-def getBeamData(cb, main_window):
-    pass
-
-def getLoadData(cb, main_window):
-    pass
-
-def analysis(cb, main_window):
-    cb.analyse()
-    cb.calcShearForces(0.1)
-    cb.calcBendingMoments(0.1)
-    print(cb)
-    nSpans = cb.getNspans()
-    for memberIndex in range(nSpans):
-        print(f"Shear Forces on Beam {memberIndex + 1}:")
-        print(f"-----------------------------------------")
-        print(cb.getMemberShearForces(memberIndex, 0.1))
-        print("\nMaximum SF: ", str(cb.beamNum[memberIndex].getMaxSF()))
-        print('-'*60)
-        print()
-        print(f"Bending Moments on Beam {memberIndex + 1}:")
-        print(f"-----------------------------------------")
-        print(cb.getMemberBendingMoments(memberIndex, 0.1))
-        print("\nMaximum BM: ", str(cb.beamNum[memberIndex].getMaxBM()))
-        print('='*60)
-        print()
-    #print("\nMaximum of Maximum SFs: ", str(cb.getMaxSF()))
-    #print("\nMaximum of Maximum BMs: ", str(cb.getMaxBM()))
-    #for memberIndex in range(nSpans):
-        sl_dfl = cb.getMemberSlopeDeflections(memberIndex)
-        slopes = [(i, j) for i, j, k in sl_dfl]
-        deflections = [(i, k) for i, j, k in sl_dfl]
-        print(f"Slopes for Beam {memberIndex + 1}:")
-        print(f"-----------------------------------------")
-        print(slopes)
-        print(f"Deflections for Beam {memberIndex + 1}:")
-        print(f"-----------------------------------------")
-        print(deflections)
-"""
 
 
 

@@ -52,10 +52,9 @@ class Beam(Member):
 
     def __str__(self):
         descr = self.type + " " + str(self.id) + ": \n" \
-                + str(self.width) + " X " + str(self.depth) \
-                + " X " + str(self.length) + "\n" \
+                + "Length = " + str(self.length) + " m. \n" \
                 + "E = " + str(self.E_MPa) + " MPa,  " \
-                + "MI = " + str(self.I) + "\n"
+                + "MI = " + str(self.I) + " m^4 \n"
         if self.is_analysed:
             descr = descr + f"{'End actions:':15} {'SF_left':^15} {'BM_left':^15} {'SF_right':^15} {'BM_right':^15}\n" 
             descr = descr + f"{'            ':15} {self.aml[0]:^15.3f} {self.aml[1]:^15.3f} {self.aml[2]:^15.3f} {self.aml[3]:^15.3f}\n" 

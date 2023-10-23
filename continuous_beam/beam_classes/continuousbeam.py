@@ -19,11 +19,12 @@ class ContinuousBeam(object):
 
     def setNspans(self, n):
         self.nSpans = n         # No. of members
-        self.beamNum = []       # List of member beams
+        self.memberBeamsList = []       # List of member beams
         for i in range(self.nSpans):
-            self.beamNum.append(Beam(i+1))
+            self.memberBeamsList.append(Beam(i+1))
         self.initJoints()
         self.calcJointPosX()
+        self.initJtActionArray()
 
     def getNspans(self):
         return self.nSpans
@@ -31,16 +32,17 @@ class ContinuousBeam(object):
     def initJoints(self):
         self.nJoints = self.nSpans + 1      # No. of joints
         self.nrj = self.nJoints             # No. of restrained joints
-        self.nRestraints = 0                # Total number of support restraints
-	                                    # against translation and rotation.
+
                                             # We are assuming hinge joints, so all
                                             # of them are restrained in translation.
         self.rL = [1, 0] * self.nJoints     # Joint Restraint List
+        self.nRestraints = self.rL.count(1) # Total number of support restraints
+	                                    # against translation and rotation.
 
     def calcJointPosX(self):
         self.jointPosX = np.zeros(self.nJoints)     # X position of joint from left-end in meters
         for i in range(1, self.nJoints):
-            self.jointPosX[i] = self.jointPosX[i-1] + self.beamNum[i-1].getLength()
+            self.jointPosX[i] = self.jointPosX[i-1] + self.memberBeamsList[i-1].getLength()
         self.total_length = self.jointPosX[-1]      # Total length of the continuous beam
 
     def getJointPosX(self, jtIndex):
@@ -48,7 +50,7 @@ class ContinuousBeam(object):
 
     def setTypicalSpan(self, typical_span):
         self.typicalSpan = typical_span
-        for aBeam in self.beamNum:
+        for aBeam in self.memberBeamsList:
             aBeam.setLength(typical_span)
         self.calcJointPosX()
 	
@@ -56,20 +58,20 @@ class ContinuousBeam(object):
         return self.typicalSpan
 
     def getMemberLength(self, beamIndex):
-        return self.beamNum[beamIndex].getLength()
+        return self.memberBeamsList[beamIndex].getLength()
 
     def getAllSpans(self):
         span_list = []
-        for aBeam in self.beamNum:
+        for aBeam in self.memberBeamsList:
             span_list.append(aBeam.getLength())
         return span_list
 
     def setAllSpans(self, span_list):
-        for i, beam in enumerate(self.beamNum):
+        for i, beam in enumerate(self.memberBeamsList):
             beam.setLength(span_list[i])
         """ Old logic, un-pythonic
-        for i in range(len(self.beamNum)):
-            self.beamNum[i].setLength(span_list[i])
+        for i in range(len(self.memberBeamsList)):
+            self.memberBeamsList[i].setLength(span_list[i])
         """
         self.calcJointPosX()
 
@@ -78,46 +80,46 @@ class ContinuousBeam(object):
 
     def setTypicalModEla(self, ModE_MPa):
         self.typicalE = ModE_MPa
-        for aBeam in self.beamNum:
+        for aBeam in self.memberBeamsList:
             aBeam.setE_in_MPa_units(ModE_MPa)
 
     def getTypicalModEla(self):
         return self.typicalE
 
     def setAllE_MPa(self, E_MPa):
-        for i, beam in enumerate(self.beamNum):
+        for i, beam in enumerate(self.memberBeamsList):
             beam.setE_in_MPa_units(E_MPa[i])
         """ Old logic, un-pythonic
-        for i in range(len(self.beamNum)):
-            self.beamNum[i].setE_in_MPa_units(E_MPa[i])
+        for i in range(len(self.memberBeamsList)):
+            self.memberBeamsList[i].setE_in_MPa_units(E_MPa[i])
         """
 
     def getAllE_MPa(self):
-        E_list = [beam.getE_in_MPa_units() for beam in self.beamNum]
+        E_list = [beam.getE_in_MPa_units() for beam in self.memberBeamsList]
         return E_list
 
     def setTypicalMomIner(self, typical_mi):
         self.typicalMI = typical_mi
-        for aBeam in self.beamNum:
+        for aBeam in self.memberBeamsList:
             aBeam.setI(typical_mi)
 
     def getTypicalMomIner(self):
         return self.typicalMI
 
     def setAllMomIner(self, mi_list):
-        for i, beam in enumerate(self.beamNum):
+        for i, beam in enumerate(self.memberBeamsList):
             beam.setI(mi_list[i])
         """ Old logic, un-pythonic
-        for i in range(len(self.beamNum)):
-            self.beamNum[i].setI(mi_list[i])
+        for i in range(len(self.memberBeamsList)):
+            self.memberBeamsList[i].setI(mi_list[i])
         """
 
     def getAllMomIner(self):
-        mi_list = [beam.getI() for beam in self.beamNum]
+        mi_list = [beam.getI() for beam in self.memberBeamsList]
         return mi_list
 
     def getAllEI(self):
-        ei_list = [beam.getEI() for beam in self.beamNum]
+        ei_list = [beam.getEI() for beam in self.memberBeamsList]
         return ei_list
 
     def getNJoints(self):
@@ -127,15 +129,18 @@ class ContinuousBeam(object):
         if(jtType == Beam.FIXED):
             self.rL[2*jtIndex] = 1
             self.rL[2*jtIndex+1] = 1
-            self.nRestraints += 2
+            # self.nRestraints += 2
         if(jtType == Beam.HINGE):
             self.rL[2*jtIndex] = 1
             self.rL[2*jtIndex+1] = 0
-            self.nRestraints += 1
+            # self.nRestraints += 1
         if(jtType == Beam.FREE):
             self.rL[2*jtIndex] = 0
             self.rL[2*jtIndex+1] = 0
-            self.nrj -= 1
+            self.nrj -= 1   # TODO check whether 'self.nrj' is used anywhere in the program.
+
+        self.nRestraints = self.rL.count(1)    # Total number of support restraints
+
 
     def getJointType(self, jtIndex):
         if((self.rL[2*jtIndex], self.rL[2*jtIndex+1]) == (1, 1)):
@@ -155,7 +160,7 @@ class ContinuousBeam(object):
 
     def calcNumUDLs(self):
         self.nUDL = 0
-        for aBeam in self.beamNum:
+        for aBeam in self.memberBeamsList:
             if abs(aBeam.getUdl()) > 0.0:   # TODO rectify, udl is an object
                 self.nUDL += 1
 
@@ -172,31 +177,31 @@ class ContinuousBeam(object):
 
     # def setMemberUDL(self, memberIndex, udl):  # TODO old (Java) name of the function
     def setMemberUDLfull(self, memberIndex, p_udl):
-        L = self.beamNum[memberIndex].getLength()
+        L = self.memberBeamsList[memberIndex].getLength()
         udl_full = UdLoadFull(p_udl, L)
-        self.beamNum[memberIndex].setUdl(udl_full)
+        self.memberBeamsList[memberIndex].setUdl(udl_full)
 
     def getMemberUDL(self, memberIndex):       # TODO rectify, udl is an object
-        return self.beamNum[memberIndex].getUdl()
+        return self.memberBeamsList[memberIndex].getUdl()
 
     def addMemberPointLoad(self, memberIndex, pointLoad):
-        self.beamNum[memberIndex].addPointLoad(pointLoad)
+        self.memberBeamsList[memberIndex].addPointLoad(pointLoad)
 
     def removeAllMemberPtLoads(self, memberIndex):
-        self.beamNum[memberIndex].removeAllPtLoads()
+        self.memberBeamsList[memberIndex].removeAllPtLoads()
 
     def getMemberPtLoads(self, memberIndex):
-        return self.beamNum[memberIndex].getPointLoads()
+        return self.memberBeamsList[memberIndex].getPointLoads()
 
     def getNumMemberPtLoads(self, memberIndex):  # TODO this is redundant
-        return len(self.beamNum[memberIndex].getPointLoads())
+        return len(self.memberBeamsList[memberIndex].getPointLoads())
 
     def setAmlMatrices(self):
-        for aBeam in self.beamNum:
+        for aBeam in self.memberBeamsList:
             aBeam.calc_aml_matrix()
 
     def setStiffnessMatrices(self):
-        for aBeam in self.beamNum:
+        for aBeam in self.memberBeamsList:
             aBeam.calc_member_stiffness_matrix()
 
     def setGlobalStiffMatrix(self):     # Global or Overall Stiffness matrix
@@ -226,28 +231,28 @@ class ContinuousBeam(object):
 
             # Building overall (global) stiffness matrix
             if(self.rL[2*i] == 0):
-                self.S[j1][j1] += self.beamNum[i].sm[0][0]    # First Column
-                self.S[j2][j1] += self.beamNum[i].sm[1][0]    # of member stiffness
-                self.S[k1][j1] +=  self.beamNum[i].sm[2][0]
-                self.S[k2][j1] +=  self.beamNum[i].sm[3][0]
+                self.S[j1][j1] += self.memberBeamsList[i].sm[0][0]    # First Column
+                self.S[j2][j1] += self.memberBeamsList[i].sm[1][0]    # of member stiffness
+                self.S[k1][j1] +=  self.memberBeamsList[i].sm[2][0]
+                self.S[k2][j1] +=  self.memberBeamsList[i].sm[3][0]
 
             if(self.rL[2*i+1] == 0):
-                self.S[j1][j2] += self.beamNum[i].sm[0][1]    # Second Column
-                self.S[j2][j2] += self.beamNum[i].sm[1][1]
-                self.S[k1][j2] +=  self.beamNum[i].sm[2][1]
-                self.S[k2][j2] +=  self.beamNum[i].sm[3][1]
+                self.S[j1][j2] += self.memberBeamsList[i].sm[0][1]    # Second Column
+                self.S[j2][j2] += self.memberBeamsList[i].sm[1][1]
+                self.S[k1][j2] +=  self.memberBeamsList[i].sm[2][1]
+                self.S[k2][j2] +=  self.memberBeamsList[i].sm[3][1]
 
             if(self.rL[2*i+2] == 0):
-                self.S[j1][k1] +=  self.beamNum[i].sm[0][2]   # Third Column
-                self.S[j2][k1] +=  self.beamNum[i].sm[1][2]
-                self.S[k1][k1] += self.beamNum[i].sm[2][2]
-                self.S[k2][k1] += self.beamNum[i].sm[3][2]
+                self.S[j1][k1] +=  self.memberBeamsList[i].sm[0][2]   # Third Column
+                self.S[j2][k1] +=  self.memberBeamsList[i].sm[1][2]
+                self.S[k1][k1] += self.memberBeamsList[i].sm[2][2]
+                self.S[k2][k1] += self.memberBeamsList[i].sm[3][2]
 
             if(self.rL[2*i+3] == 0):
-                self.S[j1][k2] +=  self.beamNum[i].sm[0][3]   # Fourth Column
-                self.S[j2][k2] +=  self.beamNum[i].sm[1][3]
-                self.S[k1][k2] += self.beamNum[i].sm[2][3]
-                self.S[k2][k2] += self.beamNum[i].sm[3][3]
+                self.S[j1][k2] +=  self.memberBeamsList[i].sm[0][3]   # Fourth Column
+                self.S[j2][k2] +=  self.memberBeamsList[i].sm[1][3]
+                self.S[k1][k2] += self.memberBeamsList[i].sm[2][3]
+                self.S[k2][k2] += self.memberBeamsList[i].sm[3][3]
 
     def invertGlobalStiffMatrix(self):
         """ Inverting the nXn part of the overall stiff. mat
@@ -261,12 +266,12 @@ class ContinuousBeam(object):
     def setEquiJointLoads(self):
         # Member loads to Equivalent joint loads
         equi_jt_load = [0, 0] * self.nJoints  #TODO check whether it should be self.equi_jt_load
-        for i in range(len(self.beamNum)):
+        for i in range(len(self.memberBeamsList)):
             # beamNum[i].calc_aml_matrix();
-            equi_jt_load[2*i+0] -= self.beamNum[i].aml[0]
-            equi_jt_load[2*i+1] -= self.beamNum[i].aml[1]
-            equi_jt_load[2*i+2] -= self.beamNum[i].aml[2]
-            equi_jt_load[2*i+3] -= self.beamNum[i].aml[3]
+            equi_jt_load[2*i+0] -= self.memberBeamsList[i].aml[0]
+            equi_jt_load[2*i+1] -= self.memberBeamsList[i].aml[1]
+            equi_jt_load[2*i+2] -= self.memberBeamsList[i].aml[2]
+            equi_jt_load[2*i+3] -= self.memberBeamsList[i].aml[3]
 
         # Combined joint loads (arranged like Overall stiff. mat.)
         self.combined_jt_load = [0, 0] * self.nJoints
@@ -318,10 +323,10 @@ class ContinuousBeam(object):
         # Copy displacements to members
         for k in range(self.nSpans):
             a = np.array(self.jt_displacement[2*k : 2*k+4])
-            self.beamNum[k].setJtDisplacements(a)
+            self.memberBeamsList[k].setJtDisplacements(a)
 
     def calcFinalMemberEndActions(self):
-        for aBeam in self.beamNum:
+        for aBeam in self.memberBeamsList:
             aBeam.calcFinalAml()
 
     def getSupportReaction(self, reactionIndex):
@@ -350,54 +355,54 @@ class ContinuousBeam(object):
         pass
 
     def calcShearForces(self, step_size=0.05):  # TODO 1. this fn. may be redundant.  2. Check whether repeated calling makes any difference
-        for aBeam in self.beamNum:              # 12-Oct-2023: Calling this function from 'analysis.py'. It is not redundant.
+        for aBeam in self.memberBeamsList:              # 12-Oct-2023: Calling this function from 'analysis.py'. It is not redundant.
             aBeam.calcShearForces(step_size)
 
     def getMemberShearForces(self, memberIndex, step_size=0.05):    # TODO 13-Oct-2023 Check whether this function is redundant.
-        return self.beamNum[memberIndex].getShearForces(step_size)
+        return self.memberBeamsList[memberIndex].getShearForces(step_size)
 
     def getMaxSF(self):
         def sortkey(tup):  # sf_list consists of tuples (point_of_interest, SF)
             return abs(tup[1])
         sf_list = []
-        for aBeam in self.beamNum:
+        for aBeam in self.memberBeamsList:
             sf_list.append(aBeam.getMaxSF())
         return(max(sf_list, key=sortkey))
 
     def calcBendingMoments(self, step_size=0.05):   # TODO 1. this fn. may be redundant.  2. Check whether repeated calling makes any difference
-        for aBeam in self.beamNum:                  # 12-Oct-2023: Calling this function from 'analysis.py'. It is not redundant.
+        for aBeam in self.memberBeamsList:                  # 12-Oct-2023: Calling this function from 'analysis.py'. It is not redundant.
             aBeam.calcBendingMoments(step_size)
 
     def getMemberBendingMoments(self, memberIndex, step_size=0.05):  # TODO 13-Oct-2023 Check whether this function is redundant
-        return self.beamNum[memberIndex].getBendingMoments(step_size)
+        return self.memberBeamsList[memberIndex].getBendingMoments(step_size)
 
     def getMaxBM(self):
         def sortkey(tup):  # bm_list consists of tuples (point_of_interest, BM)
             return abs(tup[1])
         bm_list = []
-        for aBeam in self.beamNum:
+        for aBeam in self.memberBeamsList:
             bm_list.append(aBeam.getMaxBM())
         return(max(bm_list, key=sortkey))
 
     def calcSlopeDeflections(self):   # TODO 1. Modify beam.py and write calc fn there to make this consistent with SF and BM funcs
-        for aBeam in self.beamNum:    # 12-Oct-2023: Calling this function from 'analysis.py'. It is not redundant.
+        for aBeam in self.memberBeamsList:    # 12-Oct-2023: Calling this function from 'analysis.py'. It is not redundant.
             aBeam.getSlopeDeflections()
 
     def getMaxDeflection(self):
         def sortkey(tup):  # deformations_list consists of tuples (point_of_interest, slope, deflection)
             return abs(tup[2])
         deformations_list = []
-        for aBeam in self.beamNum:
+        for aBeam in self.memberBeamsList:
             deformations_list.append(aBeam.getMaxDeflection())
         return(max(deformations_list, key=sortkey))
 
     def getMemberSlopeDeflections(self, memberIndex):
-        return self.beamNum[memberIndex].getSlopeDeflections()
+        return self.memberBeamsList[memberIndex].getSlopeDeflections()
 
     def __str__(self):
         descr = '\nContinuous Beam Analysis Results' + \
                 '\n----------------------------------------\n'
-        for aBeam in self.beamNum:
+        for aBeam in self.memberBeamsList:
             descr += str(aBeam)
             descr += '-' * 80
             descr += '\n\n\n'

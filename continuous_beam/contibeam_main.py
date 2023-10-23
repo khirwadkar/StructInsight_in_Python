@@ -259,7 +259,7 @@ def analysis(cb, main_window):
     cb.calcSupportReactions()
     cb.rearrangeVectors()
     cb.calcFinalMemberEndActions()
-    S"""
+    """
     cb.calcShearForces(0.1)
     cb.calcBendingMoments(0.1)
     print(cb)
