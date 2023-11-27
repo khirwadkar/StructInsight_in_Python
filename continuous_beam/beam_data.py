@@ -1,4 +1,9 @@
-# Module to input data about geometry of a continuous beam
+""" Module to input data about geometry of a continuous beam
+"""
+
+import sys
+sys.path.append('.')
+sys.path.append('..')
 
 #from beam_classes.beam import Beam
 #from beam_classes.continuousbeam import ContinuousBeam
@@ -7,7 +12,16 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import simpledialog
 from tkinter import messagebox
-from beam_classes.beam import Beam
+"""
+try:
+    from beam_classes.beam import Beam
+except ImportError:
+    from .beam_classes.beam import Beam
+"""
+try:
+    from beam_classes import Beam
+except ImportError:
+    from .beam_classes import Beam
 
 
 
@@ -485,7 +499,8 @@ class BeamData_Window(tk.Toplevel):
         scale = 700 / self.cb.getTotal_length()
         jtIndex = self.supportIndex
         x = 45 + int(self.cb.getJointPosX(jtIndex) * scale)
-        promptLabel = self.canvas.create_text(x+7, 180, text=f"For Jt. {jtIndex + 1} ?", fill='red')
+        # promptLabel = self.canvas.create_text(x+7, 180, text=f"For Jt. {jtIndex + 1} ?", fill='red')
+        self.canvas.create_text(x+7, 180, text=f"For Jt. {jtIndex + 1} ?", fill='red')
         self.canvas.create_line(x, 235, x+7, 195, arrow='first', fill='red', width=2)
 
 

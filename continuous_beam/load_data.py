@@ -1,4 +1,10 @@
-# Module to input loads on a continuous beam
+""" Module to input loads on a continuous beam
+"""
+
+import os
+import sys
+sys.path.append('.')
+sys.path.append('..')
 
 #from beam_classes.beam import Beam
 #from beam_classes.continuousbeam import ContinuousBeam
@@ -7,9 +13,24 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import simpledialog
 from tkinter import messagebox
-from beam_classes.beam import Beam
-from base_classes.loading import *
-
+"""
+try:
+    from beam_classes.beam import Beam
+except ImportError:
+    from .beam_classes.beam import Beam
+try:
+    from base_classes.loading import *
+except ImportError:
+    from .base_classes.loading import *
+"""
+try:
+    from beam_classes import Beam
+except ImportError:
+    from .beam_classes import Beam
+try:
+    from base_classes import PointLoad, UdLoadFull
+except ImportError:
+    from .base_classes import PointLoad, UdLoadFull
 
 
 # The class for obtaining continuous beam load data
@@ -88,11 +109,26 @@ class LoadData_Window(tk.Toplevel):
             buttonContainerFrame = ttk.Frame(self.canvas)
             self.canvas.create_window(395, 110, window=buttonContainerFrame)
 
+            """
             self.icon_up = tk.PhotoImage(file='./MyIcons/up-arrow.gif')
             self.icon_dn = tk.PhotoImage(file='./MyIcons/down-arrow.gif')
             self.icon_clk = tk.PhotoImage(file='./MyIcons/clockwise-moment.gif')
             self.icon_antclk = tk.PhotoImage(file='./MyIcons/anticlockwise-moment.gif')
+            """
+
+            load_data_file_path = os.path.abspath(__file__)
+            load_data_folder_path = os.path.dirname(load_data_file_path)
+            icons_path = os.path.join(load_data_folder_path, 'MyIcons')
+
+            up_file = os.path.join(icons_path, 'up-arrow.gif')
+            dn_file = os.path.join(icons_path, 'down-arrow.gif')
+            clk_file = os.path.join(icons_path, 'clockwise-moment.gif')
+            antclk_file = os.path.join(icons_path, 'anticlockwise-moment.gif')
             
+            self.icon_up = tk.PhotoImage(file=up_file)
+            self.icon_dn = tk.PhotoImage(file=dn_file )
+            self.icon_clk = tk.PhotoImage(file=clk_file )
+            self.icon_antclk = tk.PhotoImage(file=antclk_file)
 
 
 
@@ -216,7 +252,7 @@ class LoadData_Window(tk.Toplevel):
         vLoad = simpledialog.askfloat(title='Input Joint Load', 
                 prompt=f'Input upward point load in kN units at joint # {self.supportIndex + 1}', 
                 parent=self, initialvalue=0.0, minvalue=0.0)
-        if vLoad == None:
+        if vLoad is None:
             return
         self.cb.setJtAction(2*self.supportIndex, vLoad)
         self.draw_joint_pointLoads()
@@ -226,7 +262,7 @@ class LoadData_Window(tk.Toplevel):
         vLoad = simpledialog.askfloat(title='Input Joint Load', 
                 prompt=f'Input downward point load in kN units at joint # {self.supportIndex + 1}', 
                 parent=self, initialvalue=0.0, minvalue=0.0)
-        if vLoad == None:
+        if vLoad is None:
             return
         self.cb.setJtAction(2*self.supportIndex, -vLoad)
         self.draw_joint_pointLoads()
@@ -236,7 +272,7 @@ class LoadData_Window(tk.Toplevel):
         jtMoment = simpledialog.askfloat(title='Input Joint Moment', 
                 prompt=f'Input clockwise moment in kN-m units at joint # {self.supportIndex + 1}', 
                 parent=self, initialvalue=0.0, minvalue=0.0)
-        if jtMoment == None:
+        if jtMoment is None:
             return
         self.cb.setJtAction(2*self.supportIndex + 1, -jtMoment)
         self.draw_joint_moments()
@@ -246,7 +282,7 @@ class LoadData_Window(tk.Toplevel):
         jtMoment = simpledialog.askfloat(title='Input Joint Moment', 
                 prompt=f'Input counter-clockwise moment in kN-m units at joint # {self.supportIndex + 1}', 
                 parent=self, initialvalue=0.0, minvalue=0.0)
-        if jtMoment == None:
+        if jtMoment is None:
             return
         self.cb.setJtAction(2*self.supportIndex + 1, jtMoment)
         self.draw_joint_moments()
@@ -290,7 +326,7 @@ class LoadData_Window(tk.Toplevel):
         udl_value = simpledialog.askfloat(title='Uniformly Distributed Load (UDL)',
                 prompt=f'Input upward UDL in kN/m units on member # {self.memberIndex + 1}', 
                 parent=self, initialvalue=0.0, minvalue=0.0)
-        if udl_value == None:
+        if udl_value is None:
             return
         # TODO : The following statements would be modified after the general
         #        UDL class is developed.
@@ -302,7 +338,7 @@ class LoadData_Window(tk.Toplevel):
         udl_value = simpledialog.askfloat(title='Uniformly Distributed Load (UDL)',
                 prompt=f'Input downward UDL in kN/m units on member # {self.memberIndex + 1}', 
                 parent=self, initialvalue=0.0, minvalue=0.0)
-        if udl_value == None:
+        if udl_value is None:
             return
         # TODO : The following statements would be modified after the general
         #        UDL class is developed.
@@ -321,7 +357,7 @@ class LoadData_Window(tk.Toplevel):
         P = simpledialog.askfloat(title='Input Upward Point Load',
                 prompt=f'Upward point load in kN units on member # {self.memberIndex + 1}', 
                 parent=self, initialvalue=0.0, minvalue=0.0)
-        if P == None:
+        if P is None:
             return
         x = 0.0
         memberLength = self.cb.getMemberLength(self.memberIndex)
@@ -329,7 +365,7 @@ class LoadData_Window(tk.Toplevel):
             x = simpledialog.askfloat(title='Input Point Load Position', 
                     prompt=f'Distance in meters of {P} kN load from left end of member # {self.memberIndex + 1}', 
                     parent=self, minvalue=0.0, maxvalue=memberLength)
-            if x == None:
+            if x is None:
                 return
         else:
             messagebox.showwarning(title='Zero Point Load', parent=self, 
@@ -350,7 +386,7 @@ class LoadData_Window(tk.Toplevel):
         P = simpledialog.askfloat(title='Input Downward Point Load',
                 prompt=f'Downward point load in kN units on member # {self.memberIndex + 1}', 
                 parent=self, initialvalue=0.0, minvalue=0.0)
-        if P == None:
+        if P is None:
             return
         x = 0.0
         memberLength = self.cb.getMemberLength(self.memberIndex)
@@ -358,7 +394,7 @@ class LoadData_Window(tk.Toplevel):
             x = simpledialog.askfloat(title='Input Point Load Position', 
                     prompt=f'Distance in meters of {P} kN load from left end of member # {self.memberIndex + 1}', 
                     parent=self, minvalue=0.0, maxvalue=memberLength)
-            if x == None:
+            if x is None:
                 return
         else:
             messagebox.showwarning(title='Zero Point Load', parent=self, 
@@ -455,7 +491,8 @@ class LoadData_Window(tk.Toplevel):
         jtIndex = self.supportIndex
         x = 45 + int(self.cb.getJointPosX(jtIndex) * scale)
         y = 240
-        promptLabel = self.canvas.create_text(x+21, y-90, text=f"@ Jt. {jtIndex + 1}?", fill='green', tags=('support_pointer'))
+        # promptLabel = self.canvas.create_text(x+21, y-90, text=f"@ Jt. {jtIndex + 1}?", fill='green', tags=('support_pointer'))
+        self.canvas.create_text(x+21, y-90, text=f"@ Jt. {jtIndex + 1}?", fill='green', tags=('support_pointer'))
         self.canvas.create_line(x, y-5, x+21, y-75, arrow='first', fill='green', width=2, tags=('support_pointer'))
 
 
@@ -519,7 +556,8 @@ class LoadData_Window(tk.Toplevel):
         # pointing slightly to the right of the middle, as in the following statement.
         x = x + int(self.cb.getMemberLength(self.memberIndex) * scale * 0.60)
         y = 240
-        promptLabel = self.canvas.create_text(x+10, y-85, text=f"on member {self.memberIndex + 1}?", fill='green', tags=('member_pointer'))
+        # promptLabel = self.canvas.create_text(x+10, y-85, text=f"on member {self.memberIndex + 1}?", fill='green', tags=('member_pointer'))
+        self.canvas.create_text(x+10, y-85, text=f"on member {self.memberIndex + 1}?", fill='green', tags=('member_pointer'))
         self.canvas.create_line(x, y-8, x+10, y-70, arrow='first', fill='green', width=2, tags=('member_pointer'))
 
 
@@ -531,7 +569,7 @@ class LoadData_Window(tk.Toplevel):
             # TODO : The following statements would be modified after the general
             #        UDL class is developed.
             udl = self.cb.getMemberUDL(memberIndex)
-            udl_p = udl.p
+            # udl_p = udl.p    Linted by ruff
             x = 45 + int(self.cb.getJointPosX(memberIndex) * scale)
             L = int(self.cb.getMemberLength(memberIndex) * scale)
             n = int(L / 6)  # each arc in the drawing to represent UDL is 6 pixels wide.
@@ -568,7 +606,7 @@ class LoadData_Window(tk.Toplevel):
             ptLoadList_unsorted = self.cb.getMemberPtLoads(memberIndex)
             ptLoadList = sorted(ptLoadList_unsorted, key = lambda ob: ob.x) 
             x = 45 + int(self.cb.getJointPosX(memberIndex) * scale)
-            L = int(self.cb.getMemberLength(memberIndex) * scale)
+            # L = int(self.cb.getMemberLength(memberIndex) * scale)    Linted by ruff
             n = len(ptLoadList)
             y = 240
             for i in range(n):

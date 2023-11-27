@@ -1,4 +1,9 @@
-# Module to perform analysis of the continuous beam
+""" Module to perform analysis of the continuous beam
+"""
+
+import sys
+sys.path.append('.')
+sys.path.append('..')
 
 #from beam_classes.beam import Beam
 #from beam_classes.continuousbeam import ContinuousBeam
@@ -7,13 +12,31 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import simpledialog
 from tkinter import messagebox
-from beam_classes.beam import Beam
-from base_classes.loading import *
+"""
+try:
+    from beam_classes.beam import Beam
+except ImportError:
+    from .beam_classes.beam import Beam
+try:
+    from base_classes.loading import *
+except ImportError:
+    from .base_classes.loading import *
+"""
+try:
+    from beam_classes import Beam
+except ImportError:
+    from .beam_classes import Beam
+try:
+    from base_classes import PointLoad, UdLoadFull
+except ImportError:
+    from .base_classes import PointLoad, UdLoadFull
 
 
 
-# The class to display the results of analysis of continuous beam
 class Analysis_Window(tk.Toplevel):
+    """ The class to display results of analysis of continuous beam
+    """
+
     def __init__(self, master=None):
         super().__init__(master)
         self.transient(master)
@@ -121,7 +144,7 @@ class Analysis_Window(tk.Toplevel):
         nSpans = self.cb.getNspans()
         for beamIndex in range(nSpans):
             xStart = 45 + int(self.cb.getJointPosX(beamIndex) * drg_scale)
-            L = int(self.cb.getMemberLength(beamIndex) * drg_scale)
+            # L = int(self.cb.getMemberLength(beamIndex) * drg_scale)   Linted by ruff
             x_deformations_list = self.cb.getMemberSlopeDeflections(beamIndex)
             n = len(x_deformations_list)
             xPrev = xStart
@@ -392,7 +415,7 @@ class Analysis_Window(tk.Toplevel):
             # TODO : The following statements would be modified after the general
             #        UDL class is developed.
             udl = self.cb.getMemberUDL(memberIndex)
-            udl_p = udl.p
+            # udl_p = udl.p     Linted by ruff
             x = 45 + int(self.cb.getJointPosX(memberIndex) * scale)
             L = int(self.cb.getMemberLength(memberIndex) * scale)
             n = int(L / 6)  # each arc in the drawing to represent UDL is 6 pixels wide.
@@ -429,7 +452,7 @@ class Analysis_Window(tk.Toplevel):
             ptLoadList_unsorted = self.cb.getMemberPtLoads(memberIndex)
             ptLoadList = sorted(ptLoadList_unsorted, key = lambda ob: ob.x) 
             x = 45 + int(self.cb.getJointPosX(memberIndex) * scale)
-            L = int(self.cb.getMemberLength(memberIndex) * scale)
+            # L = int(self.cb.getMemberLength(memberIndex) * scale)       Linted by ruff
             n = len(ptLoadList)
             #y = 240
             for i in range(n):
@@ -504,7 +527,7 @@ class Analysis_Window(tk.Toplevel):
             nSpans = self.cb.getNspans()
             for memberIndex in range(nSpans):
                 file1.write(f"Shear Forces on Beam {memberIndex + 1}:\n")
-                file1.write(f"-----------------------------------------\n")
+                file1.write("-----------------------------------------\n")
                 # file1.write(self.cb.getMemberShearForces(memberIndex, 0.1))
                 sf_list = self.cb.getMemberShearForces(memberIndex, 0.1)
                 sf_list_rounded = [(round(i, 2), round(j, 3)) for i, j in sf_list]
@@ -515,7 +538,7 @@ class Analysis_Window(tk.Toplevel):
                 file1.write('\n')
                 file1.write('\n')
                 file1.write(f"Bending Moments on Beam {memberIndex + 1}:\n")
-                file1.write(f"-----------------------------------------\n")
+                file1.write("-----------------------------------------\n")
                 # file1.write(self.cb.getMemberBendingMoments(memberIndex, 0.1))
                 bm_list = self.cb.getMemberBendingMoments(memberIndex, 0.1)
                 bm_list_rounded = [(round(i, 2), round(j, 3)) for i, j in bm_list]
@@ -528,14 +551,14 @@ class Analysis_Window(tk.Toplevel):
                 slopes = [(round(i, 2), round(j, 5)) for i, j, k in sl_dfl]
                 deflections = [(round(i, 2), round(k, 5)) for i, j, k in sl_dfl]
                 file1.write(f"Slopes for Beam {memberIndex + 1}:\n")
-                file1.write(f"-----------------------------------------\n")
+                file1.write("-----------------------------------------\n")
                 file1.write(str(slopes))
                 file1.write('\n')
                 file1.write('-'*60)
                 file1.write('\n')
                 file1.write('\n')
                 file1.write(f"Deflections for Beam {memberIndex + 1}:\n")
-                file1.write(f"-----------------------------------------\n")
+                file1.write("-----------------------------------------\n")
                 file1.write(str(deflections))
                 file1.write('\n')
                 file1.write('='*60)
@@ -552,7 +575,7 @@ class Analysis_Window(tk.Toplevel):
         nSpans = self.cb.getNspans()
         for memberIndex in range(nSpans):
             print(f"Shear Forces on Beam {memberIndex + 1}:")
-            print(f"-----------------------------------------")
+            print("-----------------------------------------")
             # print(self.cb.getMemberShearForces(memberIndex, 0.1))
             sf_list = self.cb.getMemberShearForces(memberIndex, 0.1)
             sf_list_rounded = [(round(i, 2), round(j, 3)) for i, j in sf_list]
@@ -561,7 +584,7 @@ class Analysis_Window(tk.Toplevel):
             print('-'*60)
             print()
             print(f"Bending Moments on Beam {memberIndex + 1}:")
-            print(f"-----------------------------------------")
+            print("-----------------------------------------")
             # print(self.cb.getMemberBendingMoments(memberIndex, 0.1))
             bm_list = self.cb.getMemberBendingMoments(memberIndex, 0.1)
             bm_list_rounded = [(round(i, 2), round(j, 3)) for i, j in bm_list]
@@ -573,12 +596,12 @@ class Analysis_Window(tk.Toplevel):
             slopes = [(round(i, 2), round(j, 5)) for i, j, k in sl_dfl]
             deflections = [(round(i, 2), round(k, 5)) for i, j, k in sl_dfl]
             print(f"Slopes for Beam {memberIndex + 1}:")
-            print(f"-----------------------------------------")
+            print("-----------------------------------------")
             print(slopes)
             print('-'*60)
             print()
             print(f"Deflections for Beam {memberIndex + 1}:")
-            print(f"-----------------------------------------")
+            print("-----------------------------------------")
             print(deflections)
             print('='*60)
             print()
