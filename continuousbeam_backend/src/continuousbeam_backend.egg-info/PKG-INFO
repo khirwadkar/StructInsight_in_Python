@@ -1,0 +1,75 @@
+Metadata-Version: 2.1
+Name: continuousbeam-backend
+Version: 2023.11.0
+Summary: Structural analysis of continuous beam using stiffness matrix method
+Author-email: "Sanjay G. Khirwadkar" <khirwadkar@gmail.com>
+License: MIT License
+        
+        Copyright (c) 2022 khirwadkar
+        
+        Permission is hereby granted, free of charge, to any person obtaining a copy
+        of this software and associated documentation files (the "Software"), to deal
+        in the Software without restriction, including without limitation the rights
+        to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+        copies of the Software, and to permit persons to whom the Software is
+        furnished to do so, subject to the following conditions:
+        
+        The above copyright notice and this permission notice shall be included in all
+        copies or substantial portions of the Software.
+        
+        THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+        IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+        FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+        AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+        LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+        OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+        SOFTWARE.
+        
+Project-URL: Homepage, https://github.com/khirwadkar/StructInsight_in_Python
+Keywords: continuous beam,indeterminate beam,stiffness matrix,structural engineering,structural analysis
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3
+Classifier: Topic :: Scientific/Engineering
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: numpy>=1.23
+
+# Introduction
+This package is a library of classes dealing with structural analysis of a continuous beam. Stiffness matrix method is used for the analysis. The package acts as a back-end for computing shear forces, bending moments, and deformations occurring in the members of the continuous beam. The data about the geometry of the continuous beam and the loads acting on it, is to be supplied to this package by the importing front-end program.
+
+## Sub-packages and Classes
+The 'continuousbeam_backend' package comprises two sub-packages. These sub-packages and the importable classes belonging to them are as follows.
+- **beam_classes**
+    - **Beam**: this class encapsulates the attributes and behaviour of a member of a continuous beam. It is assumed that the object member is prismatic, has same cross-section, modulus of elasticity, and moment of inertia over its length. 
+    - **ContinuousBeam**: this class models a continuous beam and thus keeps track of the individual *Beam* class members, joints and support conditions, as well as loads on the them.
+- **base_classes**
+    - **PointLoad**: the attributes of this class are the magnitude of a point load and its position relative to the left end of the beam member upon which it is acting. 
+    - **UdLoadFull**: this class represents a load that is uniformly distributed over the full length of a member beam. Its attributes are magnitude of the UDL and the length of the beam member on which it is acting.  
+
+# Installation and usage
+```
+pip install continuousbeam_backend
+```
+
+**Requirements**
+
+```
+"numpy>=1.23"
+```
+> **Note** The requirements will be installed automatically while installing this package.
+
+
+
+### Importing the module
+Any of the following formats of importing can be used.
+```
+from beam_classes import Beam, ContinuousBeam
+from base_classes import PointLoad, UdLoadFull
+#or 
+from beam_classes.beam import Beam 
+from beam_classes.continuousbeam import ContinuousBeam
+from base_classes.loading import PointLoad, UdLoadFull
+```
+
