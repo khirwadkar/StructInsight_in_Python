@@ -5,23 +5,11 @@ import sys
 sys.path.append('.')
 sys.path.append('..')
 
-#from beam_classes.beam import Beam
-#from beam_classes.continuousbeam import ContinuousBeam
-#from base_classes.loading import *
 import tkinter as tk
 from tkinter import ttk
 from tkinter import simpledialog
 from tkinter import messagebox
-"""
-try:
-    from beam_classes.beam import Beam
-except ImportError:
-    from .beam_classes.beam import Beam
-try:
-    from base_classes.loading import *
-except ImportError:
-    from .base_classes.loading import *
-"""
+
 try:
     from beam_classes import Beam
 except ImportError:
@@ -61,12 +49,6 @@ class Analysis_Window(tk.Toplevel):
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(0, weight=1)
 
-
-        #self.frame1 = ttk.Frame(self)
-        #self.frame1.pack(side="top", fill="both", expand = True)
-        #self.frame1.grid_rowconfigure(0, weight=1)
-        #self.frame1.grid_columnconfigure(0, weight=1)
-        #self.init_widgets()
 
         self.cb = master.cb  # The global ContinuousBeam() object
 
@@ -144,7 +126,6 @@ class Analysis_Window(tk.Toplevel):
         nSpans = self.cb.getNspans()
         for beamIndex in range(nSpans):
             xStart = 45 + int(self.cb.getJointPosX(beamIndex) * drg_scale)
-            # L = int(self.cb.getMemberLength(beamIndex) * drg_scale)   Linted by ruff
             x_deformations_list = self.cb.getMemberSlopeDeflections(beamIndex)
             n = len(x_deformations_list)
             xPrev = xStart
@@ -452,9 +433,7 @@ class Analysis_Window(tk.Toplevel):
             ptLoadList_unsorted = self.cb.getMemberPtLoads(memberIndex)
             ptLoadList = sorted(ptLoadList_unsorted, key = lambda ob: ob.x) 
             x = 45 + int(self.cb.getJointPosX(memberIndex) * scale)
-            # L = int(self.cb.getMemberLength(memberIndex) * scale)       Linted by ruff
             n = len(ptLoadList)
-            #y = 240
             for i in range(n):
                 posX = x + int(ptLoadList[i].x * scale)
 
@@ -483,7 +462,6 @@ class Analysis_Window(tk.Toplevel):
         for jtIndex in range(nJoints):
             reaction = self.cb.getSupportReaction(2*jtIndex)
             x = 45 + int(self.cb.getJointPosX(jtIndex) * scale)
-            #y = 240
             if reaction > 0.0:        # Upward reaction positive
                 self.canvas.create_line(x, y, x, y+50, arrow='first', fill='blue', tags=('loadReaction'))
                 if jtIndex % 2 == 0:
@@ -505,7 +483,6 @@ class Analysis_Window(tk.Toplevel):
         for jtIndex in range(nJoints):
             reactMoment = self.cb.getSupportReaction(2*jtIndex + 1)
             x = 45 + int(self.cb.getJointPosX(jtIndex) * scale)
-            #y = 250
             if reactMoment > 0.0:      # Anti-clockwise moment positive
                 self.canvas.create_arc(x-15, y-20, x+25, y+20, style='arc', outline='green',
                         start=70, extent=220, tags=('momentReaction'))

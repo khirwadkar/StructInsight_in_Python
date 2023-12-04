@@ -1,0 +1,5 @@
+[console_scripts]
+contibeam = continuousbeam.contibeam_main:main
+
+[gui_scripts]
+contibeam_win = continuousbeam.contibeam_main:main_gui

@@ -1,0 +1,8 @@
+# MANIFEST.in 
+# From: https://setuptools.pypa.io/en/latest/userguide/miscellaneous.html
+
+graft src
+graft tests
+# `-> adds all files inside a directory
+
+

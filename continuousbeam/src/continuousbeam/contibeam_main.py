@@ -1,5 +1,11 @@
-# Starting point of the continuous beam analysis program.
-# This module comprises the graphics classes for user interface.
+""" Starting point of the continuous beam analysis program.
+
+    This module renders the frontend GUI menu for the various
+    options available in the continuous beam analysis.
+
+    The module can be invoked directly from the command prompt
+    or it can be imported from some other module.
+"""
 
 import sys
 sys.path.append('.')
@@ -10,34 +16,14 @@ from tkinter import ttk
 from tkinter import simpledialog
 from tkinter import messagebox
 
-"""
-try:
-    # from beam_classes.beam import Beam
-    from beam_classes.continuousbeam import ContinuousBeam
-    from base_classes.loading import *
-    from beam_data import BeamData_Window
-    from load_data import LoadData_Window
-    from analysis import Analysis_Window
-except ImportError:
-    # from .beam_classes.beam import Beam
-    from .beam_classes.continuousbeam import ContinuousBeam
-    from .base_classes.loading import *
-    from .beam_data import BeamData_Window
-    from .load_data import LoadData_Window
-    from .analysis import Analysis_Window
-"""
 
 try:
-    # from beam_classes import Beam
     from beam_classes import ContinuousBeam
     from base_classes import PointLoad, UdLoadFull
     from beam_data import BeamData_Window
     from load_data import LoadData_Window
     from analysis import Analysis_Window
 except ImportError:
-    # from .beam_classes import Beam
-    from .beam_classes import ContinuousBeam
-    from .base_classes import PointLoad, UdLoadFull
     from .beam_data import BeamData_Window
     from .load_data import LoadData_Window
     from .analysis import Analysis_Window
@@ -45,8 +31,10 @@ except ImportError:
 is_direct_call = False   # This module can be directly invoked from the command line.
 
 
-# The class for displaying the main menu of continuous beam program
 class ContiBeamMenuWindow(tk.Toplevel):
+    """ The class for displaying the main menu of continuous beam program
+    """
+
     def __init__(self, master=None):
         super().__init__(master)
         self.transient(master)
@@ -81,18 +69,20 @@ class ContiBeamMenuWindow(tk.Toplevel):
         # Create the ttk buttons
         self.btn1 = ttk.Button(self.frame1, text="Input Beam Data", style="Blue.TButton", 
                 command=self.open_beam_data_window)
-        #   , command=lambda: self.root_win.show_frame(self.root_win.frame2))
         self.btn2 = ttk.Button(self.frame1, text="Input Load Data", style="Blue.TButton", width=30,
                 command=self.open_load_data_window)
         self.btn3 = ttk.Button(self.frame1, text="Analysis", style="Blue.TButton", width=30,
                 command=self.open_analysis_window)
+        self.btn4 = ttk.Button(self.frame1, text="Exit", style="Blue.TButton", width=30,
+                command=self.on_closing)
+        """
         if is_direct_call:
             self.btn4 = ttk.Button(self.frame1, text="Exit", style="Blue.TButton", width=30,
                     command=self.on_closing)
-            #self.btn4.state(['disabled'])
         else:
             self.btn4 = ttk.Button(self.frame1, text="Return to Main Menu", style="Blue.TButton",
                     command=self.on_closing)
+        """
         # dummy buttons to provide for future expansion of the program
         self.btn5 = ttk.Button(self.frame1, text="", style="Blue.TButton", width=30, state='disabled')
         self.btn6 = ttk.Button(self.frame1, text="", style="Blue.TButton", width=30, state='disabled')
@@ -166,9 +156,10 @@ class ContiBeamMenuWindow(tk.Toplevel):
 
 
 
-# The class to create the root window if this module is invoked
-# directly from the command line.
 class CB_direct(tk.Tk):
+    """ The class to create the root window if this module is invoked
+        directly from the command line.
+    """
 
     def __init__(self, *args, **kwargs):
         #tk.Tk.__init__(self, *args, **kwargs)
@@ -185,12 +176,20 @@ class CB_direct(tk.Tk):
         self.wait_window(new_window) # Wait for the child window to close
         self.destroy()
 
-
-
-if __name__ == '__main__':
+def main_gui():
     is_direct_call = True
     app = CB_direct()
     app.mainloop()
+
+
+def main():
+    is_direct_call = True
+    app = CB_direct()
+    app.mainloop()
+
+
+if __name__ == '__main__':
+    main()
 
 
 

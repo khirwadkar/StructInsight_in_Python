@@ -5,9 +5,6 @@ import sys
 sys.path.append('.')
 sys.path.append('..')
 
-#from beam_classes.beam import Beam
-#from beam_classes.continuousbeam import ContinuousBeam
-#from base_classes.loading import *
 import tkinter as tk
 from tkinter import ttk
 from tkinter import simpledialog
@@ -25,8 +22,10 @@ except ImportError:
 
 
 
-# The class for obtaining continuous beam geometry data
 class BeamData_Window(tk.Toplevel):
+    """ The class for obtaining continuous beam geometry data
+    """
+
     def __init__(self, master=None):
         super().__init__(master)
         self.transient(master)
@@ -52,12 +51,6 @@ class BeamData_Window(tk.Toplevel):
         self.grid_rowconfigure(0, weight=1)
 
 
-        #self.frame1 = ttk.Frame(self)
-        #self.frame1.pack(side="top", fill="both", expand = True)
-        #self.frame1.grid_rowconfigure(0, weight=1)
-        #self.frame1.grid_columnconfigure(0, weight=1)
-        #self.init_widgets()
-
         self.cb = master.cb  # The global ContinuousBeam() object
 
         self.qNo = 0
@@ -75,15 +68,8 @@ class BeamData_Window(tk.Toplevel):
         self.supportIndex = 0
     
 
-    def test(self):
-        self.canvas.create_line(10, 5, 200, 50)
-
     def get_data(self):
         if self.qNo == 0:     # Get number of spans (beams)
-            # question_label = tk.StringVar()
-            # question_label.set(self.question[self.qNo])
-            # qL = ttk.Label(self, textvariable=question_label)
-            # qL = ttk.Label(self.canvas, text=self.question[self.qNo])
             qL = ttk.Label(self.canvas)
             qL['text'] = self.question[self.qNo]
             self.canvas.create_window(100, 10, anchor='nw', window=qL)
@@ -92,10 +78,6 @@ class BeamData_Window(tk.Toplevel):
             answer_text.set(str(self.cb.getNspans()))
             answer_box = ttk.Entry(self.canvas, width = 7, textvariable=answer_text)
             answer_box.bind("<Return>", lambda e: self.on_getting_nSpans(answer_text.get()))
-            #answer_box = ttk.Entry(self.canvas, width = 7, text=str(self.cb.getNspans()))
-            #answer_box.delete(0, 'end')
-            #answer_box.insert(0, str(self.cb.getNspans()))
-            #answer_box.bind("<Return>", lambda e: self.on_getting_nSpans(answer_box.get()))
             self.canvas.create_window(500, 10, anchor='nw', window=answer_box)
 
             answer_box.focus()
@@ -170,7 +152,6 @@ class BeamData_Window(tk.Toplevel):
             drawing_scale = 700 / self.cb.getTotal_length()
             typical_modE = self.cb.getTypicalModEla()
             nSpans = self.cb.getNspans()
-            #span_list = self.cb.getAllSpans()  # At this stage, their value equals typicalSpan
             modE_stringvar_list = []
             answer_box_list = []
             for i in range(nSpans):
@@ -215,7 +196,6 @@ class BeamData_Window(tk.Toplevel):
             drawing_scale = 700 / self.cb.getTotal_length()
             typical_mi = self.cb.getTypicalMomIner()
             nSpans = self.cb.getNspans()
-            #span_list = self.cb.getAllSpans()  # At this stage, their value equals typicalSpan
             MI_stringvar_list = []
             answer_box_list = []
             for i in range(nSpans):
@@ -277,7 +257,6 @@ class BeamData_Window(tk.Toplevel):
                 exitButton = ttk.Button(self.canvas, text='Exit', command = (lambda: self.destroy()))
                 self.canvas.create_window(395, 450, window=exitButton)
 
-        # print(f"qN0 = {self.qNo}")
 
 
     def on_getting_nSpans(self, nSpans_txt):
@@ -300,6 +279,7 @@ class BeamData_Window(tk.Toplevel):
         self.canvas.delete(tk.ALL)
         self.get_data()
 
+
     def on_getting_typicalSpan(self, typicalSpan_txt):
         try:
             typicalSpan = float(typicalSpan_txt)
@@ -319,6 +299,7 @@ class BeamData_Window(tk.Toplevel):
         self.qNo += 1
         self.canvas.delete(tk.ALL)
         self.get_data()
+
 
     def on_getting_allSpans(self, spanList_of_StringVar):
         span_list_txt = [span.get() for span in spanList_of_StringVar]
@@ -343,6 +324,7 @@ class BeamData_Window(tk.Toplevel):
         self.canvas.delete(tk.ALL)
         self.get_data()
 
+
     def on_getting_typicalModE(self, typicalModE_txt):
         try:
             typicalModE = float(typicalModE_txt)
@@ -362,6 +344,7 @@ class BeamData_Window(tk.Toplevel):
         self.qNo += 1
         self.canvas.delete(tk.ALL)
         self.get_data()
+
 
     def on_getting_allModE(self, modEList_of_StringVar):
         modE_list_txt = [modE.get() for modE in modEList_of_StringVar]
@@ -386,6 +369,7 @@ class BeamData_Window(tk.Toplevel):
         self.canvas.delete(tk.ALL)
         self.get_data()
 
+
     def on_getting_typicalMI(self, typicalMI_txt):
         try:
             typicalMI = float(typicalMI_txt)
@@ -405,6 +389,7 @@ class BeamData_Window(tk.Toplevel):
         self.qNo += 1
         self.canvas.delete(tk.ALL)
         self.get_data()
+
 
     def on_getting_allMI(self, MI_List_of_StringVar):
         mi_list_txt = [MI.get() for MI in MI_List_of_StringVar]
@@ -428,6 +413,7 @@ class BeamData_Window(tk.Toplevel):
         self.qNo += 1
         self.canvas.delete(tk.ALL)
         self.get_data()
+
 
     def paint_beam(self):
         drawing_scale = 700 / self.cb.getTotal_length()

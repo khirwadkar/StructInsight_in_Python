@@ -4,7 +4,7 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import simpledialog
 import tkinter.messagebox as messagebox
-from continuous_beam import contibeam_main
+from continuousbeam import contibeam_main
 
 
 

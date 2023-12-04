@@ -5,7 +5,7 @@ requires      = ["setuptools>=61.0.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "continuousbeam_backend"
+name = "continuousbeam"
 # Version system: YYYY.0M.PATCH
 version = "2023.11.0"
 description = "Structural analysis of continuous beam using stiffness matrix method"
@@ -20,10 +20,16 @@ classifiers = [
 ]
 keywords = ["continuous beam", "indeterminate beam", "stiffness matrix", "structural engineering", "structural analysis"]
 dependencies = [
-     "numpy >= 1.23",
+     "continuousbeam-backend >= 2023.11.0",
 ]
 requires-python = ">=3.8"
 
 [project.urls]
 Homepage = "https://github.com/khirwadkar/StructInsight_in_Python"
+
+[project.scripts]
+contibeam = "continuousbeam.contibeam_main:main"
+
+[project.gui-scripts]
+contibeam_win = "continuousbeam.contibeam_main:main_gui"
 

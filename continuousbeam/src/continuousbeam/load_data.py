@@ -6,23 +6,13 @@ import sys
 sys.path.append('.')
 sys.path.append('..')
 
-#from beam_classes.beam import Beam
-#from beam_classes.continuousbeam import ContinuousBeam
-#from base_classes.loading import *
+from importlib import resources
+
 import tkinter as tk
 from tkinter import ttk
 from tkinter import simpledialog
 from tkinter import messagebox
-"""
-try:
-    from beam_classes.beam import Beam
-except ImportError:
-    from .beam_classes.beam import Beam
-try:
-    from base_classes.loading import *
-except ImportError:
-    from .base_classes.loading import *
-"""
+
 try:
     from beam_classes import Beam
 except ImportError:
@@ -33,8 +23,10 @@ except ImportError:
     from .base_classes import PointLoad, UdLoadFull
 
 
-# The class for obtaining continuous beam load data
 class LoadData_Window(tk.Toplevel):
+    """ The class for obtaining continuous beam load data
+    """
+
     def __init__(self, master=None):
         super().__init__(master)
         self.transient(master)
@@ -59,12 +51,6 @@ class LoadData_Window(tk.Toplevel):
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(0, weight=1)
 
-
-        #self.frame1 = ttk.Frame(self)
-        #self.frame1.pack(side="top", fill="both", expand = True)
-        #self.frame1.grid_rowconfigure(0, weight=1)
-        #self.frame1.grid_columnconfigure(0, weight=1)
-        #self.init_widgets()
 
         self.cb = master.cb  # The global ContinuousBeam() object
 
@@ -116,6 +102,8 @@ class LoadData_Window(tk.Toplevel):
             self.icon_antclk = tk.PhotoImage(file='./MyIcons/anticlockwise-moment.gif')
             """
 
+            """
+            Working:
             load_data_file_path = os.path.abspath(__file__)
             load_data_folder_path = os.path.dirname(load_data_file_path)
             icons_path = os.path.join(load_data_folder_path, 'MyIcons')
@@ -129,10 +117,29 @@ class LoadData_Window(tk.Toplevel):
             self.icon_dn = tk.PhotoImage(file=dn_file )
             self.icon_clk = tk.PhotoImage(file=clk_file )
             self.icon_antclk = tk.PhotoImage(file=antclk_file)
+            """
+
+            try:
+                with resources.path('MyIcons', 'up-arrow.gif') as up_file:
+                    self.icon_up = tk.PhotoImage(file=up_file)
+                with resources.path('MyIcons', 'down-arrow.gif') as dn_file:
+                    self.icon_dn = tk.PhotoImage(file=dn_file )
+                with resources.path('MyIcons', 'clockwise-moment.gif') as clk_file:
+                    self.icon_clk = tk.PhotoImage(file=clk_file )
+                with resources.path('MyIcons', 'anticlockwise-moment.gif') as antclk_file:
+                    self.icon_antclk = tk.PhotoImage(file=antclk_file)
+            except ModuleNotFoundError:
+                with resources.path('continuousbeam.MyIcons', 'up-arrow.gif') as up_file:
+                    self.icon_up = tk.PhotoImage(file=up_file)
+                with resources.path('continuousbeam.MyIcons', 'down-arrow.gif') as dn_file:
+                    self.icon_dn = tk.PhotoImage(file=dn_file )
+                with resources.path('continuousbeam.MyIcons', 'clockwise-moment.gif') as clk_file:
+                    self.icon_clk = tk.PhotoImage(file=clk_file )
+                with resources.path('continuousbeam.MyIcons', 'anticlockwise-moment.gif') as antclk_file:
+                    self.icon_antclk = tk.PhotoImage(file=antclk_file)
 
 
 
-            #self.upJtLoadBt = ttk.Button(buttonContainerFrame, text='  Upward Load  ', command = (lambda: self.on_upJtLoadBt_click()))
             self.upJtLoadBt = ttk.Button(buttonContainerFrame, image=self.icon_up, text=' Upward\n Load  ',
                     compound=tk.LEFT, command = (lambda: self.on_upJtLoadBt_click()))
             self.upJtLoadBt.pack(side=tk.LEFT, padx=5, ipadx=5, expand=True) 
@@ -556,7 +563,6 @@ class LoadData_Window(tk.Toplevel):
         # pointing slightly to the right of the middle, as in the following statement.
         x = x + int(self.cb.getMemberLength(self.memberIndex) * scale * 0.60)
         y = 240
-        # promptLabel = self.canvas.create_text(x+10, y-85, text=f"on member {self.memberIndex + 1}?", fill='green', tags=('member_pointer'))
         self.canvas.create_text(x+10, y-85, text=f"on member {self.memberIndex + 1}?", fill='green', tags=('member_pointer'))
         self.canvas.create_line(x, y-8, x+10, y-70, arrow='first', fill='green', width=2, tags=('member_pointer'))
 
@@ -606,7 +612,6 @@ class LoadData_Window(tk.Toplevel):
             ptLoadList_unsorted = self.cb.getMemberPtLoads(memberIndex)
             ptLoadList = sorted(ptLoadList_unsorted, key = lambda ob: ob.x) 
             x = 45 + int(self.cb.getJointPosX(memberIndex) * scale)
-            # L = int(self.cb.getMemberLength(memberIndex) * scale)    Linted by ruff
             n = len(ptLoadList)
             y = 240
             for i in range(n):
