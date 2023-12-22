@@ -1,4 +1,8 @@
-#Starting point of the StructInsight software
+""" StructInsight software's main menu.
+
+    Starting point of the package for analysis of all types of structures.
+    Provides framework for the future development of the project.
+"""
 
 import tkinter as tk
 from tkinter import ttk
@@ -7,8 +11,9 @@ import tkinter.messagebox as messagebox
 from continuousbeam import contibeam_main
 
 
-
 class StructInsight(tk.Tk):
+    """ Class to create graphics window for displaying the main menu.
+    """
 
     def __init__(self, *args, **kwargs):
         #tk.Tk.__init__(self, *args, **kwargs) # does same job as of the next statement.
@@ -48,6 +53,7 @@ class StructInsight(tk.Tk):
         btn4 = ttk.Button(self.root_frame, text="Plane Truss", style="Blue.TButton", width=30)
         btn5 = ttk.Button(self.root_frame, text="Space Truss", style="Blue.TButton", width=30)
         btn6 = ttk.Button(self.root_frame, text="General FEM", style="Blue.TButton", width=30)
+        btn7 = ttk.Button(self.root_frame, text="Exit", style="Blue.TButton", width=30, command=self.on_closing)
 
         # Disable the unprogrammed buttons
         btn2.state(['disabled'])
@@ -63,6 +69,7 @@ class StructInsight(tk.Tk):
         btn4.grid(row=4, column=0, padx=150, pady=20, sticky="ew")
         btn5.grid(row=5, column=0, padx=150, pady=20, sticky="ew")
         btn6.grid(row=6, column=0, padx=150, pady=20, sticky="ew")
+        btn7.grid(row=7, column=0, padx=150, pady=20, sticky="ew")
 
     def show_frame(self, current_frame):
         #frame = self.frames[current_frame]
